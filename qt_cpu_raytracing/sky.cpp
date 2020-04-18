@@ -24,8 +24,8 @@ IBL::~IBL() {
 
 QVector3D IBL::getRadiance(const Ray &ray) const {
     //方向を球面座標系に変換
-    double theta = std::acos(ray.direction.y());
-    double phi = std::atan2(ray.direction.z(), ray.direction.x());
+    double theta = acos(ray.direction.y());
+    double phi = atan2(ray.direction.z(), ray.direction.x());
     if(phi < 0) phi += 2*M_PI;
 
     //(i, j)を計算

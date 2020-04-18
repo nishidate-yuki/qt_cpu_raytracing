@@ -1,6 +1,6 @@
 #include "renderview.h"
 
-const int NUM_SAMPLES = 100;
+const int NUM_SAMPLES = 16;
 const int DEPTH = 8;
 
 RenderView::RenderView(QWidget *parent)
@@ -72,27 +72,23 @@ void RenderView::render()
     show();
     image->save("E:/Desktop/dev/render.png");
 
-    sky = QSharedPointer<IBL>(new IBL("E:/Pictures/Textures/_HDRI/1k/blinds_1k.hdr"));
+//    sky = new IBL("E:/Pictures/Textures/_HDRI/1k/blinds_1k.hdr");
+//    sky->getRadiance(Ray(QVector3D(0, 0, 0)));
 }
 
 QVector3D RenderView::radiance(Ray& ray, const QVector<Sphere>& spheres)
 {
 //    UniformSky sky(QVector3D(0, 0.5, 0));
-    SimpleSky simpleSky;
-//    IBL sky("E:/Pictures/Textures/_HDRI/1k/blinds_1k.hdr");
+    static IBL sky("E:/Pictures/Textures/_HDRI/4k/rural_landscape_4k.hdr");
 
     for (int depth = 0; depth<DEPTH; depth++) {
         // hitしなかったらbackgroundを返す
         Intersection intersection;
         if(!ray.intersectScene(spheres, intersection)){
-//            ray.emission = backgroundColor;
-//            ray.emission = sky->getRadiance(ray);
-
-              ray.emission = simpleSky.getRadiance(ray);
+            ray.emission = sky.getRadiance(ray);
+//            ray.emission = simpleSky.getRadiance(ray);
             break;
         }
-
-//        qDebug() << "ID:" << intersection.objectIndex;
 
         Sphere sphere = spheres[intersection.objectIndex];
         Hitpoint hitpoint = intersection.hitpoint;

@@ -28,7 +28,7 @@ private:
     QGraphicsScene* scene;
     QGraphicsPixmapItem* pixmapItem;
     QImage* image;
-    QSharedPointer<IBL> sky;
+//    IBL* sky;
 };
 
 #endif // RENDERVIEW_H
