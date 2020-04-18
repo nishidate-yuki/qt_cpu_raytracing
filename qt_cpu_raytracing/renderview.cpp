@@ -50,20 +50,13 @@ void RenderView::render()
                 ray.direction = (screenPosition - cameraPosition).normalized();
 
                 fColor += radiance(ray, spheres, 8);
-    //            if (ray.intersectScene(spheres, intersection)){
-    //                float brightness = QVector3D::dotProduct(hitpoint.normal, lightPosition.normalized());
-    //                brightness = qBound(ambientLight, brightness+ambientLight, float(1.0));
-    //                color = QColor(brightness*255, brightness*255, brightness*255);
-    //            }else{
-    //                color = QColor(0, 0, 0);
-    //            }
-
             }
             QColor color;
             color.setRedF(fColor[0]/NUM_SAMPLES);
             color.setGreenF(fColor[1]/NUM_SAMPLES);
             color.setBlueF(fColor[2]/NUM_SAMPLES);
             image->setPixelColor(w, h, color);
+
         }
     }
 

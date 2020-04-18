@@ -72,8 +72,10 @@ bool Ray::intersectScene(const QVector<Sphere>& scene, Intersection& intersectio
     for (int i=0; i<scene.size(); i++) {
         Hitpoint hitpoint;
         if(intersect(scene[i], hitpoint)){
-            intersection.hitpoint = hitpoint;
-            intersection.objectIndex = i;
+            if(hitpoint.distance < intersection.hitpoint.distance){
+                intersection.hitpoint = hitpoint;
+                intersection.objectIndex = i;
+            }
         }
     }
     return intersection.objectIndex != -1;
