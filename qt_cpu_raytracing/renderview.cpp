@@ -12,9 +12,10 @@ RenderView::RenderView(QWidget *parent)
 void RenderView::render()
 {
     // image setting
-    const int width = 480;
-    const int height = 360;
+    constexpr int width = 480;
+    constexpr int height = 360;
     image = new QImage(width, height, QImage::Format_RGB32);
+    QVector<QVector<QVector3D>> fImage(height);
 
     const double screenWidth = 15.0 * width / height;
     const double screenHeight= 15.0;
@@ -38,7 +39,10 @@ void RenderView::render()
     #pragma omp parallel for
     for (int h=0; h<height; h++) {
         for (int w=0; w<width; w++) {
+
             QVector3D fColor(0, 0, 0);
+//            fImage[h].append(fColor);
+
             for (int n=0; n<NUM_SAMPLES; n++) {
 
                 // raytracing
@@ -52,14 +56,31 @@ void RenderView::render()
 
                 fColor += radiance(ray, spheres);
             }
-            QColor color;
-            color.setRedF(fColor[0]/NUM_SAMPLES);
-            color.setGreenF(fColor[1]/NUM_SAMPLES);
-            color.setBlueF(fColor[2]/NUM_SAMPLES);
-            image->setPixelColor(w, h, color);
+//            QColor color;
+//            color.setRedF(fColor[0]/NUM_SAMPLES);
+//            color.setGreenF(fColor[1]/NUM_SAMPLES);
+//            color.setBlueF(fColor[2]/NUM_SAMPLES);
+//            image->setPixelColor(w, h, color);
+
+//            fImage[h][w] = fColor;
+            fImage[h].append(fColor/NUM_SAMPLES);
 
         }
         qDebug() << h;
+    }
+
+//    gammaCorrection(fImage);
+
+    for (int h=0; h<height; h++) {
+        for (int w=0; w<width; w++) {
+            QVector3D& fColor = fImage[h][w];
+
+            QColor color;
+            color.setRgbF(qBound(0.0f, fColor.x(), 1.0f),
+                          qBound(0.0f, fColor.y(), 1.0f),
+                          qBound(0.0f, fColor.z(), 1.0f));
+            image->setPixelColor(w, h, color);
+        }
     }
 
     scene = new QGraphicsScene();
@@ -78,7 +99,6 @@ void RenderView::render()
 
 QVector3D RenderView::radiance(Ray& ray, const QVector<Sphere>& spheres)
 {
-//    UniformSky sky(QVector3D(0, 0.5, 0));
     static IBL sky("E:/Pictures/Textures/_HDRI/4k/rural_landscape_4k.hdr");
 
     for (int depth = 0; depth<DEPTH; depth++) {
@@ -86,7 +106,6 @@ QVector3D RenderView::radiance(Ray& ray, const QVector<Sphere>& spheres)
         Intersection intersection;
         if(!ray.intersectScene(spheres, intersection)){
             ray.emission = sky.getRadiance(ray);
-//            ray.emission = simpleSky.getRadiance(ray);
             break;
         }
 
@@ -94,10 +113,6 @@ QVector3D RenderView::radiance(Ray& ray, const QVector<Sphere>& spheres)
         Hitpoint hitpoint = intersection.hitpoint;
 
         QVector3D normal = hitpoint.normal;
-        // sphereの内側からrayが出ていく場合
-//        if(dot(normal, ray.direction) < 0){
-//            normal *= -1.0;
-//        }
 
         // Light
         if(sphere.material.materialType == LIGHT){

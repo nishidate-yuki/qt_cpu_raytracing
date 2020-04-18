@@ -3,6 +3,7 @@
 
 //#include <stdlib.h>
 #include <QVector3D>
+#include <QImage>
 
 float frand();
 
@@ -17,4 +18,7 @@ void orthonormalize(const QVector3D&, QVector3D&, QVector3D&);
 QVector3D worldToLocal(const QVector3D&, const QVector3D&, const QVector3D&, const QVector3D&);
 
 QVector3D localToWorld(const QVector3D&, const QVector3D&, const QVector3D&, const QVector3D&);
+
+void gammaCorrection(QVector<QVector<QVector3D>>&);
+
 #endif // UTILS_H
