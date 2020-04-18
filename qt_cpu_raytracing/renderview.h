@@ -12,6 +12,7 @@
 #include "omp.h"
 #include "ray.h"
 #include "utils.h"
+#include "sky.h"
 
 class RenderView : public QGraphicsView
 {
@@ -27,6 +28,7 @@ private:
     QGraphicsScene* scene;
     QGraphicsPixmapItem* pixmapItem;
     QImage* image;
+    QSharedPointer<IBL> sky;
 };
 
 #endif // RENDERVIEW_H

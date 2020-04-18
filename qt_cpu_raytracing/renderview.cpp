@@ -1,6 +1,6 @@
 #include "renderview.h"
 
-const int NUM_SAMPLES = 8;
+const int NUM_SAMPLES = 100;
 const int DEPTH = 8;
 
 RenderView::RenderView(QWidget *parent)
@@ -31,7 +31,8 @@ void RenderView::render()
     diffuse.materialType = DIFFUSE;
 
     QVector<Sphere> spheres;
-    spheres << Sphere{QVector3D(0, 0, 0), 4, light};
+    spheres << Sphere{QVector3D(4, 0, 0), 4, light};
+    spheres << Sphere{QVector3D(-4, 0, 0), 4, diffuse};
     spheres << Sphere{QVector3D(0, -10004, 0), 10000, diffuse};
 
     #pragma omp parallel for
@@ -70,17 +71,24 @@ void RenderView::render()
     setMinimumSize(qMin(width+2, 1280), qMin(height+2, 720));
     show();
     image->save("E:/Desktop/dev/render.png");
+
+    sky = QSharedPointer<IBL>(new IBL("E:/Pictures/Textures/_HDRI/1k/blinds_1k.hdr"));
 }
 
 QVector3D RenderView::radiance(Ray& ray, const QVector<Sphere>& spheres)
 {
-    QVector3D backgroundColor(0.0, 0.0, 0.0f);
+//    UniformSky sky(QVector3D(0, 0.5, 0));
+    SimpleSky simpleSky;
+//    IBL sky("E:/Pictures/Textures/_HDRI/1k/blinds_1k.hdr");
 
     for (int depth = 0; depth<DEPTH; depth++) {
         // hitしなかったらbackgroundを返す
         Intersection intersection;
         if(!ray.intersectScene(spheres, intersection)){
-            ray.emission = backgroundColor;
+//            ray.emission = backgroundColor;
+//            ray.emission = sky->getRadiance(ray);
+
+              ray.emission = simpleSky.getRadiance(ray);
             break;
         }
 

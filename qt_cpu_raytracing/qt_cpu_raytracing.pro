@@ -29,12 +29,15 @@ SOURCES += \
         mainwindow.cpp \
         ray.cpp \
         renderview.cpp \
+        sky.cpp \
         utils.cpp
 
 HEADERS += \
         mainwindow.h \
         ray.h \
         renderview.h \
+        sky.h \
+        stb_image.h \
         utils.h
 
 FORMS += \
