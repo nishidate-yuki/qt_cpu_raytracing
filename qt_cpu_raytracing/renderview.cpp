@@ -1,6 +1,6 @@
 #include "renderview.h"
 
-const int NUM_SAMPLES = 64;
+const int NUM_SAMPLES = 8;
 const int DEPTH = 8;
 
 RenderView::RenderView(QWidget *parent)
@@ -69,6 +69,7 @@ void RenderView::render()
     setScene(scene);
     setMinimumSize(qMin(width+2, 1280), qMin(height+2, 720));
     show();
+    image->save("E:/Desktop/dev/render.png");
 }
 
 QVector3D RenderView::radiance(Ray& ray, const QVector<Sphere>& spheres)
@@ -110,12 +111,19 @@ QVector3D RenderView::radiance(Ray& ray, const QVector<Sphere>& spheres)
             QVector3D s, t;
             orthonormalize(n, s, t);
 
-            float theta = 0.5 * std::acos(1 - 2*frand());
-            float phi = 2*M_PI * frand();
+            // importance sampling
+            float phi = 2 * M_PI * frand();
+            float y = sqrt(frand());
+            float d = sqrt(1 - y*y);
+            float x = d * cos(phi);
+            float z = d * sin(phi);
 
-            float x = cos(phi) * sin(theta);
-            float y = cos(theta);
-            float z = sin(phi) * sin(theta);
+            // simple sampling
+//            float theta = 0.5 * acos(1 - 2*frand());
+//            float phi = 2*M_PI * frand();
+//            float x = cos(phi) * sin(theta);
+//            float y = cos(theta);
+//            float z = sin(phi) * sin(theta);
 
             QVector3D localNextDirection(x, y, z);
 
