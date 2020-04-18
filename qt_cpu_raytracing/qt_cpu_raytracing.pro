@@ -27,16 +27,20 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
+        material.cpp \
         ray.cpp \
         renderview.cpp \
         sky.cpp \
+        sphere.cpp \
         utils.cpp
 
 HEADERS += \
         mainwindow.h \
+        material.h \
         ray.h \
         renderview.h \
         sky.h \
+        sphere.h \
         stb_image.h \
         utils.h
 

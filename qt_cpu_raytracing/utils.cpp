@@ -54,7 +54,3 @@ void gammaCorrection(QVector<QVector<QVector3D>> &fImage) {
         }
     }
 }
-
-QVector3D reflect(const QVector3D& v, const QVector3D& n) {
-    return -v + 2*dot(v, n)*n;
-}

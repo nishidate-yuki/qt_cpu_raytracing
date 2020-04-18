@@ -2,29 +2,7 @@
 #define RAY_H
 
 #include <QVector3D>
-
-enum MaterialType {
-    DIFFUSE,	// 完全拡散面
-    SPECULAR,	// 完全鏡面
-    REFRACTION,	// 完全なガラス
-    LIGHT,      // ライト
-};
-
-struct Material{
-    QVector3D scatter;
-    QVector3D emission;
-    MaterialType materialType;
-
-    Material() :
-        scatter(1.0, 1.0, 1.0), emission(0, 0, 0),
-        materialType(DIFFUSE) {}
-};
-
-struct Sphere {
-    QVector3D center;
-    float radius;
-    Material material;
-};
+#include "material.h"
 
 struct Hitpoint{
     float distance;

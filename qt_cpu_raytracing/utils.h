@@ -21,6 +21,5 @@ QVector3D localToWorld(const QVector3D&, const QVector3D&, const QVector3D&, con
 
 void gammaCorrection(QVector<QVector<QVector3D>> &);
 
-QVector3D reflect(const QVector3D&, const QVector3D&);
 
 #endif // UTILS_H

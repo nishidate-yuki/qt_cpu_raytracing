@@ -127,6 +127,7 @@ QVector3D RenderView::radiance(Ray& ray, const QVector<Sphere>& spheres)
             // サンプリングしたレイをワールドに戻すために使う
             QVector3D n = normal;
             QVector3D s, t;
+            // TODO: s, n, t = orthonormalize(n)にする
             orthonormalize(n, s, t);
 
             // importance sampling

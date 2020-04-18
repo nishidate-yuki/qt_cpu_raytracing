@@ -14,6 +14,7 @@
 #include "ray.h"
 #include "utils.h"
 #include "sky.h"
+#include "sphere.h"
 
 class RenderView : public QGraphicsView
 {
