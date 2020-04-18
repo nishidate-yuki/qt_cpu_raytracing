@@ -18,6 +18,7 @@ public:
     RenderView(QWidget *parent);
 
     void render();
+    QVector3D radiance(Ray&, const QVector<Sphere>&,const int);
 
 private:
     QGraphicsScene* scene;

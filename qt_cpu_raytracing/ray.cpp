@@ -25,24 +25,39 @@ bool Ray::intersect(const Sphere &sphere, Hitpoint& hitpoint)
     float b = QVector3D::dotProduct(rayToSphere, direction);
     float c = QVector3D::dotProduct(rayToSphere, rayToSphere)
               - sphere.radius * sphere.radius;
-    float d = b*b - a*c;
+    float discriminant = b*b - a*c;
 
-    if(d < 0){
+    if(discriminant < 0){
         return false;
     }
 
-    float t1 = -b - sqrt(d); // small t
-    float t2 = -b + sqrt(d); // big t
+    float t1 = -b - sqrt(discriminant); // small t
+    float t2 = -b + sqrt(discriminant); // big t
 
     // Rayの後ろ方向でヒットしていても更新しない
     // 既にもっと近い地点でヒットしていたら更新しない
-    if(0 < t1 && t1 < hitpoint.distance){
+//    if(0 < t1 && t1 < hitpoint.distance){
+//        hitpoint.distance = t1;
+//        hitpoint.position = origin + t1 * direction;
+//        hitpoint.normal = (hitpoint.position - sphere.center).normalized();
+//        return true;
+//    }
+//    if(0 < t2 && t2 < hitpoint.distance){
+//        hitpoint.distance = t2;
+//        hitpoint.position = origin + t2 * direction;
+//        hitpoint.normal = (hitpoint.position - sphere.center).normalized();
+//        return true;
+//    }
+
+    // Rayの後ろ方向でヒットしていても更新しない
+    // 既にもっと近い地点でヒットしているかは無視する
+    if(0 < t1){
         hitpoint.distance = t1;
         hitpoint.position = origin + t1 * direction;
         hitpoint.normal = (hitpoint.position - sphere.center).normalized();
         return true;
     }
-    if(0 < t2 && t2 < hitpoint.distance){
+    if(0 < t2){
         hitpoint.distance = t2;
         hitpoint.position = origin + t2 * direction;
         hitpoint.normal = (hitpoint.position - sphere.center).normalized();
@@ -50,4 +65,16 @@ bool Ray::intersect(const Sphere &sphere, Hitpoint& hitpoint)
     }
 
     return false;
+}
+
+bool Ray::intersectScene(const QVector<Sphere>& scene, Intersection& intersection)
+{
+    for (int i=0; i<scene.size(); i++) {
+        Hitpoint hitpoint;
+        if(intersect(scene[i], hitpoint)){
+            intersection.hitpoint = hitpoint;
+            intersection.objectIndex = i;
+        }
+    }
+    return intersection.objectIndex != -1;
 }
