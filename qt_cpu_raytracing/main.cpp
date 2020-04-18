@@ -2,7 +2,6 @@
 #include <QApplication>
 #include <QStyleFactory>
 #include <QtDebug>
-#include "utils.h"
 
 int main(int argc, char *argv[])
 {
@@ -33,10 +32,6 @@ int main(int argc, char *argv[])
 
     MainWindow w;
     w.show();
-
-//    for (int i=0; i<100; i++) {
-//        qDebug() << floatRand();
-//    }
 
     return a.exec();
 }

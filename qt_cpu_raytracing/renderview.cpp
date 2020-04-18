@@ -1,7 +1,7 @@
 #include "renderview.h"
 
-const int NUM_SAMPLES = 16;
-const int DEPTH = 4;
+const int NUM_SAMPLES = 64;
+const int DEPTH = 8;
 
 RenderView::RenderView(QWidget *parent)
     : QGraphicsView(parent)
@@ -16,23 +16,24 @@ void RenderView::render()
     const int height = 360;
     image = new QImage(width, height, QImage::Format_RGB32);
 
-
     const double screenWidth = 15.0 * width / height;
     const double screenHeight= 15.0;
-    const float ambientLight = 0.1;
 
     QVector3D cameraPosition(0, 0, 15);
-    QVector3D lightPosition(10, 10, 10);
 
     Material light;
     light.emission = QVector3D(1, 1, 1);
     light.materialType = LIGHT;
 
-    QVector<Sphere> spheres;
-    spheres << Sphere{QVector3D(-4, 0, 0), 5, light};
-    spheres << Sphere{QVector3D(4, 0, 0), 5};
+    Material diffuse;
+    diffuse.scatter = QVector3D(1, 1, 1);
+    diffuse.emission = QVector3D(0, 0, 0);
+    diffuse.materialType = DIFFUSE;
 
-    QRandomGenerator randomGenerator;
+    QVector<Sphere> spheres;
+    spheres << Sphere{QVector3D(0, 0, 0), 4, light};
+    spheres << Sphere{QVector3D(0, -10004, 0), 10000, diffuse};
+
     #pragma omp parallel for
     for (int h=0; h<height; h++) {
         for (int w=0; w<width; w++) {
@@ -40,11 +41,9 @@ void RenderView::render()
             for (int n=0; n<NUM_SAMPLES; n++) {
 
                 // raytracing
-                float randX = float(randomGenerator.generateDouble());
-                float randY = float(randomGenerator.generateDouble());
                 QVector3D screenPosition;
-                screenPosition[0] = (w+randX)/width * screenWidth - screenWidth/2.0;
-                screenPosition[1] = (height-(h+randY))/height * screenHeight - screenHeight/2.0;
+                screenPosition[0] = (w+frand())/width * screenWidth - screenWidth/2.0;
+                screenPosition[1] = (height-(h+frand()))/height * screenHeight - screenHeight/2.0;
                 screenPosition[2] = cameraPosition[2] - 10;
 
                 Ray ray(cameraPosition);
@@ -74,8 +73,7 @@ void RenderView::render()
 
 QVector3D RenderView::radiance(Ray& ray, const QVector<Sphere>& spheres)
 {
-//    QRandomGenerator randomGenerator;
-    QVector3D backgroundColor(0.0, 0.0, 0.3f);
+    QVector3D backgroundColor(0.0, 0.0, 0.0f);
 
     for (int depth = 0; depth<DEPTH; depth++) {
         // hitしなかったらbackgroundを返す
@@ -92,9 +90,9 @@ QVector3D RenderView::radiance(Ray& ray, const QVector<Sphere>& spheres)
 
         QVector3D normal = hitpoint.normal;
         // sphereの内側からrayが出ていく場合
-        if(QVector3D::dotProduct(normal, ray.direction) < 0){
-            normal *= -1.0;
-        }
+//        if(dot(normal, ray.direction) < 0){
+//            normal *= -1.0;
+//        }
 
         // Light
         if(sphere.material.materialType == LIGHT){
@@ -103,21 +101,29 @@ QVector3D RenderView::radiance(Ray& ray, const QVector<Sphere>& spheres)
         }
 
         // Diffuse
-//        if(sphere.material.materialType == DIFFUSE){
-//            ray.direction.setY(qSqrt(randomGenerator.generateDouble()));
+        if(sphere.material.materialType == DIFFUSE){
 
-//            float d = sqrt(1 - ray.direction.y()*ray.direction.y());
-//            float v = rand() * 2 * M_PI;
-//            QVector3D UppVec;
-//            QVector3D BinVec;
-//            QVector3D TanVec;
-//            QVector3D EX = QVector3D(1, 0, 0);
-//            float DX = qAbs(QVector3D::dotProduct(normal, EX));
-//            QVector3D EY = QVector3D(0, 1, 0);
-//            float DY = qAbs(QVector3D::dotProduct((normal, EY));
-//            QVector3D EZ = QVector3D(0, 0, 1);
-//            float DZ = qAbs(QVector3D::dotProduct((normal, EZ));
-//        }
+            // ローカル座標系 (s, n, t) を作る
+            // 完全拡散反射はローカル座標系のレイは必要ない
+            // サンプリングしたレイをワールドに戻すために使う
+            QVector3D n = normal;
+            QVector3D s, t;
+            orthonormalize(n, s, t);
+
+            float theta = 0.5 * std::acos(1 - 2*frand());
+            float phi = 2*M_PI * frand();
+
+            float x = cos(phi) * sin(theta);
+            float y = cos(theta);
+            float z = sin(phi) * sin(theta);
+
+            QVector3D localNextDirection(x, y, z);
+
+            ray.origin = hitpoint.position + normal * 0.001f;
+            ray.direction = localToWorld(localNextDirection, s, n, t);
+
+            ray.emission = QVector3D(0, 0, 0);
+        }
 
         // Normal
         else{
@@ -132,7 +138,7 @@ QVector3D RenderView::radiance(Ray& ray, const QVector<Sphere>& spheres)
 
     // simple shading
 //    QVector3D lightPosition(10, 10, 10);
-//    float brightness = QVector3D::dotProduct(hitpoint.normal, (lightPosition-hitpoint.position).normalized());
+//    float brightness = dot(hitpoint.normal, (lightPosition-hitpoint.position).normalized());
 //    brightness = qMax(brightness, 0.0f);
 //    return QVector3D(brightness, brightness, brightness);
 }

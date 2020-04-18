@@ -6,7 +6,6 @@
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
 #include <QtDebug>
-#include <QVector3D>
 #include <QRandomGenerator>
 #include <QtMath>
 

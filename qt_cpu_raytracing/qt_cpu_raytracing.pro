@@ -28,7 +28,8 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
         ray.cpp \
-        renderview.cpp
+        renderview.cpp \
+        utils.cpp
 
 HEADERS += \
         mainwindow.h \
