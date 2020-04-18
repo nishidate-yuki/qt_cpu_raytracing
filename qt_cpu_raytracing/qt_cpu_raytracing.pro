@@ -33,7 +33,8 @@ SOURCES += \
 HEADERS += \
         mainwindow.h \
         ray.h \
-        renderview.h
+        renderview.h \
+        utils.h
 
 FORMS += \
         mainwindow.ui

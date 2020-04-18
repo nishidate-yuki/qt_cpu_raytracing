@@ -74,7 +74,7 @@ void RenderView::render()
 
 QVector3D RenderView::radiance(Ray& ray, const QVector<Sphere>& spheres)
 {
-
+//    QRandomGenerator randomGenerator;
     QVector3D backgroundColor(0.0, 0.0, 0.3f);
 
     for (int depth = 0; depth<DEPTH; depth++) {
@@ -106,6 +106,17 @@ QVector3D RenderView::radiance(Ray& ray, const QVector<Sphere>& spheres)
 //        if(sphere.material.materialType == DIFFUSE){
 //            ray.direction.setY(qSqrt(randomGenerator.generateDouble()));
 
+//            float d = sqrt(1 - ray.direction.y()*ray.direction.y());
+//            float v = rand() * 2 * M_PI;
+//            QVector3D UppVec;
+//            QVector3D BinVec;
+//            QVector3D TanVec;
+//            QVector3D EX = QVector3D(1, 0, 0);
+//            float DX = qAbs(QVector3D::dotProduct(normal, EX));
+//            QVector3D EY = QVector3D(0, 1, 0);
+//            float DY = qAbs(QVector3D::dotProduct((normal, EY));
+//            QVector3D EZ = QVector3D(0, 0, 1);
+//            float DZ = qAbs(QVector3D::dotProduct((normal, EZ));
 //        }
 
         // Normal

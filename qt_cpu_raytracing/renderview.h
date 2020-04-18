@@ -12,6 +12,7 @@
 
 #include "omp.h"
 #include "ray.h"
+#include "utils.h"
 
 class RenderView : public QGraphicsView
 {
