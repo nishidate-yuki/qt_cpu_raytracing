@@ -8,8 +8,9 @@
 #include <QtDebug>
 #include <QVector3D>
 #include <QRandomGenerator>
-#include "omp.h"
+#include <QtMath>
 
+#include "omp.h"
 #include "ray.h"
 
 class RenderView : public QGraphicsView
@@ -20,7 +21,7 @@ public:
     RenderView(QWidget *parent);
 
     void render();
-    QVector3D radiance(Ray&, const QVector<Sphere>&,const int);
+    QVector3D radiance(Ray&, const QVector<Sphere>&);
 
 private:
     QGraphicsScene* scene;

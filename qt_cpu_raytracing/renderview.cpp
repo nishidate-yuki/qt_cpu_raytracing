@@ -1,6 +1,7 @@
 #include "renderview.h"
 
 const int NUM_SAMPLES = 16;
+const int DEPTH = 4;
 
 RenderView::RenderView(QWidget *parent)
     : QGraphicsView(parent)
@@ -10,9 +11,6 @@ RenderView::RenderView(QWidget *parent)
 
 void RenderView::render()
 {
-//    QString filename = "E:/Desktop/dev/bird.jpg";
-//    image = new QImage(filename);
-
     // image setting
     const int width = 480;
     const int height = 360;
@@ -25,10 +23,13 @@ void RenderView::render()
 
     QVector3D cameraPosition(0, 0, 15);
     QVector3D lightPosition(10, 10, 10);
-//    Sphere sphere = {QVector3D(0, 0, 0), 7};
+
+    Material light;
+    light.emission = QVector3D(1, 1, 1);
+    light.materialType = LIGHT;
 
     QVector<Sphere> spheres;
-    spheres << Sphere{QVector3D(-4, 0, 0), 5};
+    spheres << Sphere{QVector3D(-4, 0, 0), 5, light};
     spheres << Sphere{QVector3D(4, 0, 0), 5};
 
     QRandomGenerator randomGenerator;
@@ -49,7 +50,7 @@ void RenderView::render()
                 Ray ray(cameraPosition);
                 ray.direction = (screenPosition - cameraPosition).normalized();
 
-                fColor += radiance(ray, spheres, 8);
+                fColor += radiance(ray, spheres);
             }
             QColor color;
             color.setRedF(fColor[0]/NUM_SAMPLES);
@@ -58,6 +59,7 @@ void RenderView::render()
             image->setPixelColor(w, h, color);
 
         }
+        qDebug() << h;
     }
 
     scene = new QGraphicsScene();
@@ -70,19 +72,56 @@ void RenderView::render()
     show();
 }
 
-QVector3D RenderView::radiance(Ray& ray, const QVector<Sphere>& spheres, const int depth)
+QVector3D RenderView::radiance(Ray& ray, const QVector<Sphere>& spheres)
 {
+
     QVector3D backgroundColor(0.0, 0.0, 0.3f);
-    Intersection intersection;
-    if(!ray.intersectScene(spheres, intersection)){
-        return backgroundColor;
+
+    for (int depth = 0; depth<DEPTH; depth++) {
+        // hitしなかったらbackgroundを返す
+        Intersection intersection;
+        if(!ray.intersectScene(spheres, intersection)){
+            ray.emission = backgroundColor;
+            break;
+        }
+
+//        qDebug() << "ID:" << intersection.objectIndex;
+
+        Sphere sphere = spheres[intersection.objectIndex];
+        Hitpoint hitpoint = intersection.hitpoint;
+
+        QVector3D normal = hitpoint.normal;
+        // sphereの内側からrayが出ていく場合
+        if(QVector3D::dotProduct(normal, ray.direction) < 0){
+            normal *= -1.0;
+        }
+
+        // Light
+        if(sphere.material.materialType == LIGHT){
+            ray.emission = sphere.material.emission;
+            break;
+        }
+
+        // Diffuse
+//        if(sphere.material.materialType == DIFFUSE){
+//            ray.direction.setY(qSqrt(randomGenerator.generateDouble()));
+
+//        }
+
+        // Normal
+        else{
+            ray.emission = normal/2 + QVector3D(0.5, 0.5, 0.5);
+            break;
+        }
+
     }
 
-    QVector3D lightPosition(10, 10, 10);
-    Sphere spehre = spheres[intersection.objectIndex];
-    Hitpoint hitpoint = intersection.hitpoint;
+    return ray.scatter * ray.emission;
 
-    float brightness = QVector3D::dotProduct(hitpoint.normal, (lightPosition-hitpoint.position).normalized());
-    brightness = qMax(brightness, 0.0f);
-    return QVector3D(brightness, brightness, brightness);
+
+    // simple shading
+//    QVector3D lightPosition(10, 10, 10);
+//    float brightness = QVector3D::dotProduct(hitpoint.normal, (lightPosition-hitpoint.position).normalized());
+//    brightness = qMax(brightness, 0.0f);
+//    return QVector3D(brightness, brightness, brightness);
 }

@@ -3,20 +3,21 @@
 
 #include <QVector3D>
 
-enum ReflectionType {
+enum MaterialType {
     DIFFUSE,	// 完全拡散面
     SPECULAR,	// 完全鏡面
     REFRACTION,	// 完全なガラス
+    LIGHT,      // ライト
 };
 
 struct Material{
     QVector3D scatter;
     QVector3D emission;
-    ReflectionType reflectionType;
+    MaterialType materialType;
 
     Material() :
         scatter(1.0, 1.0, 1.0), emission(0, 0, 0),
-        reflectionType(DIFFUSE) {}
+        materialType(DIFFUSE) {}
 };
 
 struct Sphere {
@@ -29,7 +30,7 @@ struct Hitpoint{
     float distance;
     QVector3D position;
     QVector3D normal;
-    int material;
+//    int material;
 
     Hitpoint() : distance(FLT_MAX), position(), normal() {}
 };
