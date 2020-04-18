@@ -7,6 +7,8 @@
 #include <QGraphicsScene>
 #include <QtDebug>
 #include <QVector3D>
+#include <QRandomGenerator>
+#include "omp.h"
 
 #include "ray.h"
 

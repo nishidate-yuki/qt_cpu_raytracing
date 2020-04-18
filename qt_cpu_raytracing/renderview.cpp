@@ -1,5 +1,7 @@
 #include "renderview.h"
 
+const int NUM_SAMPLES = 16;
+
 RenderView::RenderView(QWidget *parent)
     : QGraphicsView(parent)
 {
@@ -29,33 +31,38 @@ void RenderView::render()
     spheres << Sphere{QVector3D(-4, 0, 0), 5};
     spheres << Sphere{QVector3D(4, 0, 0), 5};
 
+    QRandomGenerator randomGenerator;
+    #pragma omp parallel for
     for (int h=0; h<height; h++) {
         for (int w=0; w<width; w++) {
-//            for (int n=0; n<8; n++) {
+            QVector3D fColor(0, 0, 0);
+            for (int n=0; n<NUM_SAMPLES; n++) {
 
-//            }
-            // raytracing
-            QVector3D screenPosition;
-            screenPosition[0] = float(w)/width * screenWidth - screenWidth/2.0;
-            screenPosition[1] = float(height-h)/height * screenHeight - screenHeight/2.0;
-            screenPosition[2] = cameraPosition[2] - 10;
+                // raytracing
+                float randX = float(randomGenerator.generateDouble());
+                float randY = float(randomGenerator.generateDouble());
+                QVector3D screenPosition;
+                screenPosition[0] = (w+randX)/width * screenWidth - screenWidth/2.0;
+                screenPosition[1] = (height-(h+randY))/height * screenHeight - screenHeight/2.0;
+                screenPosition[2] = cameraPosition[2] - 10;
 
-            Ray ray(cameraPosition);
-            ray.direction = (screenPosition - cameraPosition).normalized();
+                Ray ray(cameraPosition);
+                ray.direction = (screenPosition - cameraPosition).normalized();
 
+                fColor += radiance(ray, spheres, 8);
+    //            if (ray.intersectScene(spheres, intersection)){
+    //                float brightness = QVector3D::dotProduct(hitpoint.normal, lightPosition.normalized());
+    //                brightness = qBound(ambientLight, brightness+ambientLight, float(1.0));
+    //                color = QColor(brightness*255, brightness*255, brightness*255);
+    //            }else{
+    //                color = QColor(0, 0, 0);
+    //            }
+
+            }
             QColor color;
-            QVector3D fColor = radiance(ray, spheres, 8);
-            color.setRedF(fColor[0]);
-            color.setGreenF(fColor[1]);
-            color.setBlueF(fColor[2]);
-//            if (ray.intersectScene(spheres, intersection)){
-//                float brightness = QVector3D::dotProduct(hitpoint.normal, lightPosition.normalized());
-//                brightness = qBound(ambientLight, brightness+ambientLight, float(1.0));
-//                color = QColor(brightness*255, brightness*255, brightness*255);
-//            }else{
-//                color = QColor(0, 0, 0);
-//            }
-
+            color.setRedF(fColor[0]/NUM_SAMPLES);
+            color.setGreenF(fColor[1]/NUM_SAMPLES);
+            color.setBlueF(fColor[2]/NUM_SAMPLES);
             image->setPixelColor(w, h, color);
         }
     }
