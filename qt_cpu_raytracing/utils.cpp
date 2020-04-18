@@ -43,19 +43,18 @@ QVector3D localToWorld(const QVector3D& v, const QVector3D& s, const QVector3D& 
 }
 
 // ガンマ補正
-void gammaCorrection(QVector<QVector<QVector3D>>& fImage) {
+void gammaCorrection(QVector<QVector<QVector3D>> &fImage) {
     int width = fImage[0].size();
     int height = fImage.size();
+
     for(int w = 0; w < width; w++) {
         for(int h = 0; h < height; h++) {
             QVector3D c = fImage[h][w];
             fImage[h][w] = QVector3D(pow(c.x(), 1/2.2), pow(c.y(), 1/2.2), pow(c.z(), 1/2.2));
         }
     }
-//    for(int i = 0; i < image.width(); i++) {
-//        for(int j = 0; j < image.height(); j++) {
-//            QColor c = image.pixelColor(i, j);
-//            this->setPixel(i, j, Vec3(std::pow(c.x, 1/2.2), std::pow(c.y, 1/2.2), std::pow(c.z, 1/2.2)));
-//        }
-//    }
-};
+}
+
+QVector3D reflect(const QVector3D& v, const QVector3D& n) {
+    return -v + 2*dot(v, n)*n;
+}
