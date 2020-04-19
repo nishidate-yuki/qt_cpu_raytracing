@@ -3,6 +3,7 @@
 
 #include <QVector3D>
 #include "material.h"
+#include "sphere.h"
 
 struct Hitpoint{
     float distance;

@@ -29,10 +29,11 @@ QVector3D reflect(const QVector3D&, const QVector3D&);
 class Material
 {
 public:
-    Material();
-    virtual ~Material();
+//    Material();
+//    virtual ~Material();
 
-    virtual QVector3D sample(const QVector3D& direction, double& pdf) const = 0;
+    virtual QVector3D sample(const QVector3D& direction, float& pdf, int& depth) const = 0;
+    virtual QVector3D getWeight(const QVector3D& direction, float& theta) const = 0;
 
     QVector3D scatter;
     QVector3D emission;
@@ -42,17 +43,30 @@ class Diffuse : public Material
 {
 public:
     Diffuse();
-    ~Diffuse() override {}
+    ~Diffuse() {}
 
-    QVector3D sample(const QVector3D& direction, double& pdf) const override;
+    QVector3D sample(const QVector3D& direction, float& pdf, int& depth) const override;
+    QVector3D getWeight(const QVector3D& direction, float& theta) const override;
 };
 
 class Mirror : public Material
 {
 public:
     Mirror();
-    ~Mirror() override {}
+    ~Mirror() {}
 
-    QVector3D sample(const QVector3D& direction, double& pdf) const override;
+    QVector3D sample(const QVector3D& direction, float& pdf, int& depth) const override;
+    QVector3D getWeight(const QVector3D& direction, float& theta) const override;
 };
+
+class Light : public Material
+{
+public:
+    Light();
+    ~Light() {}
+
+    QVector3D sample(const QVector3D& direction, float& pdf, int& depth) const override;
+    QVector3D getWeight(const QVector3D& direction, float& theta) const override;
+};
+
 #endif // MATERIAL_H

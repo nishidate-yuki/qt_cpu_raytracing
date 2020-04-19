@@ -24,10 +24,10 @@ public:
     RenderView(QWidget *parent);
 
     void render();
-    QVector3D radiance(Ray&, const QVector<Sphere>&);
+    QVector3D radiance(Ray&, const QVector<Sphere>&, int&);
 
 private:
-    QGraphicsScene* scene;
+    QGraphicsScene* graphicsScene;
     QGraphicsPixmapItem* pixmapItem;
     QImage* image;
 //    IBL* sky;

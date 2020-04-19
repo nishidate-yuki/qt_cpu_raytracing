@@ -7,6 +7,7 @@
 #include <QString>
 #include <QSharedDataPointer>
 #include <memory>
+#include <typeinfo>
 #include "material.h"
 
 //struct Sphere {
@@ -18,11 +19,13 @@
 class Sphere
 {
 public:
-    Sphere();
+    Sphere(const QVector3D& center, const float& radius);
+    Sphere(const QVector3D& center, const float& radius, const std::shared_ptr<Material>& material);
+//    Sphere(const QVector3D& center, const float& radius, Material* material);
 
     QVector3D center;
     float radius;
-    std::unique_ptr<Material> material;
+    std::shared_ptr<Material> material;
 };
 
 #endif // SPHERE_H
