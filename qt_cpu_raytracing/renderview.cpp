@@ -93,23 +93,22 @@ QVector3D RenderView::radiance(Ray& ray, const QVector<Sphere>& spheres, int& de
 
     // Hitした情報を取得
     Sphere sphere = spheres[intersection.objectIndex];
-    Hitpoint hitpoint = intersection.hitpoint;
 
     // ローカル座標系 (s, n, t) を作る
-    auto [n, s, t] = orthonormalize(hitpoint.normal);
+    auto [n, s, t] = orthonormalize(intersection.normal);
 
     // world座標 -> local座標
     QVector3D localDirection = worldToLocal(-ray.direction, s, n, t);
 
     // 次のrayのサンプル取得
-    float tmp;
-    localDirection = sphere.material->sample(localDirection, tmp, depth);
+    float pdf;
+    localDirection = sphere.material->sample(localDirection, pdf, depth);
 
     // weightの取得
-    QVector3D weight = sphere.material->getWeight(localDirection, tmp);
+    QVector3D weight = sphere.material->getWeight(localDirection, pdf);
 
     // ray更新
-    ray.origin = hitpoint.position + hitpoint.normal * 0.001f;
+    ray.origin = intersection.position + intersection.normal * 0.001f;
     ray.direction = localToWorld(localDirection, s, n, t);
 
     // 再帰でradiance取得

@@ -15,11 +15,20 @@ struct Hitpoint{
 };
 
 struct Intersection {
-    Hitpoint hitpoint;
+    float distance;
+    QVector3D position;
+    QVector3D normal;
     int objectIndex;
 
-    Intersection() : objectIndex(-1) {}
+    Intersection() : distance(FLT_MAX), objectIndex(-1) {}
 };
+
+//struct Intersection {
+//    Hitpoint hitpoint;
+//    int objectIndex;
+
+//    Intersection() : objectIndex(-1) {}
+//};
 
 
 //const Sphere scene[] = {
@@ -32,7 +41,7 @@ public:
     Ray(const QVector3D&);
     Ray(const QVector3D&, const QVector3D&);
 
-    bool intersect(const Sphere&, Hitpoint&);
+    bool intersect(const Sphere&, Intersection&);
     bool intersectScene(const QVector<Sphere>&, Intersection&);
 
     QVector3D origin;

@@ -18,7 +18,7 @@ Ray::Ray(const QVector3D& o, const QVector3D& d)
 {
 }
 
-bool Ray::intersect(const Sphere &sphere, Hitpoint& hitpoint)
+bool Ray::intersect(const Sphere &sphere, Intersection& hitpoint)
 {
     QVector3D rayToSphere = origin - sphere.center;
     float a = QVector3D::dotProduct(direction, direction);
@@ -70,10 +70,10 @@ bool Ray::intersect(const Sphere &sphere, Hitpoint& hitpoint)
 bool Ray::intersectScene(const QVector<Sphere>& scene, Intersection& intersection)
 {
     for (int i=0; i<scene.size(); i++) {
-        Hitpoint hitpoint;
+        Intersection hitpoint;
         if(intersect(scene[i], hitpoint)){
-            if(hitpoint.distance < intersection.hitpoint.distance){
-                intersection.hitpoint = hitpoint;
+            if(hitpoint.distance < intersection.distance){
+                intersection = hitpoint;
                 intersection.objectIndex = i;
             }
         }
