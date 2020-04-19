@@ -15,8 +15,8 @@ void RenderView::render()
     timer.start();
 
     // image setting
-    constexpr int width = 480;
-    constexpr int height = 270;
+    constexpr int width = 320;
+    constexpr int height = 180;
     image = new QImage(width, height, QImage::Format_RGB32);
     QVector<QVector<QVector3D>> fImage(height);
 
@@ -24,11 +24,11 @@ void RenderView::render()
     const double screenHeight= 15.0;
     QVector3D cameraPosition(0, 2, 25);
 
-    QVector<Sphere> spheres;
-    spheres << Sphere(QVector3D(10, 0, 0), 4, std::make_shared<Light>());
-    spheres << Sphere(QVector3D(-10, 0, 0), 4, std::make_shared<Diffuse>());
-    spheres << Sphere(QVector3D(0, 0, 0), 4, std::make_shared<Mirror>());
-    spheres << Sphere(QVector3D(0, -10004, 0), 10000, std::make_shared<Diffuse>());
+    QVector<Sphere> scene;
+    scene << Sphere(QVector3D(10, 0, 0), 4, std::make_shared<Light>());
+    scene << Sphere(QVector3D(-10, 0, 0), 4, std::make_shared<Diffuse>());
+    scene << Sphere(QVector3D(0, 0, 0), 4, std::make_shared<Mirror>());
+    scene << Sphere(QVector3D(0, -10004, 0), 10000, std::make_shared<Diffuse>());
 
     #pragma omp parallel for schedule(dynamic, 1)
     for (int h=0; h<height; h++) {
@@ -47,7 +47,7 @@ void RenderView::render()
 
                 // calc radiance
                 int depth = 0;
-                fColor += radiance(ray, spheres, depth);
+                fColor += radiance(ray, scene, depth);
             }
             fImage[h].append(fColor/NUM_SAMPLES);
         }
@@ -76,6 +76,7 @@ void RenderView::render()
 
     setScene(graphicsScene);
     setMinimumSize(qMin(width+2, 1280), qMin(height+2, 720));
+    setMaximumSize(qMin(width+2, 1280), qMin(height+2, 720));
     show();
     image->save("E:/Desktop/dev/render.png");
 
@@ -83,16 +84,17 @@ void RenderView::render()
 
 }
 
-QVector3D RenderView::radiance(Ray& ray, const QVector<Sphere>& spheres, int& depth)
+
+QVector3D RenderView::radiance(Ray& ray, const QVector<Sphere>& scene, int& depth)
 {
     static IBL sky("E:/Pictures/Textures/_HDRI/4k/rural_landscape_4k.hdr");
 
     // シーンとの交差判定
     Intersection intersection;
-    if(!ray.intersectScene(spheres, intersection)) return sky.getRadiance(ray);
+    if(!ray.intersectScene(scene, intersection)) return sky.getRadiance(ray);
 
     // Hitした情報を取得
-    Sphere sphere = spheres[intersection.objectIndex];
+    Sphere sphere = scene[intersection.objectIndex];
 
     // ローカル座標系 (s, n, t) を作る
     auto [n, s, t] = orthonormalize(intersection.normal);
@@ -104,7 +106,7 @@ QVector3D RenderView::radiance(Ray& ray, const QVector<Sphere>& spheres, int& de
     float pdf;
     localDirection = sphere.material->sample(localDirection, pdf, depth);
 
-    // weightの取得
+    // (BRDF * cosθ / pdf) の取得
     QVector3D weight = sphere.material->getWeight(localDirection, pdf);
 
     // ray更新
@@ -113,10 +115,10 @@ QVector3D RenderView::radiance(Ray& ray, const QVector<Sphere>& spheres, int& de
 
     // 再帰でradiance取得
     if(depth > DEPTH) return sphere.material->emission;
-    QVector3D inRandiance = radiance(ray, spheres, depth);
+    QVector3D inRandiance = radiance(ray, scene, depth);
 
     // 最終的なレンダリング方程式
     // Lo = Le + (BRDF * Li * cosθ)/pdf = Le + wieght*Li
     return sphere.material->emission + weight * inRandiance;
-
 }
+
