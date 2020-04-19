@@ -1,7 +1,7 @@
 #include "renderview.h"
 
-const int NUM_SAMPLES = 20;
-constexpr int DEPTH = 8;
+const int NUM_SAMPLES = 1;
+constexpr int DEPTH = 1;
 
 RenderView::RenderView(QWidget *parent)
     : QGraphicsView(parent)
@@ -34,6 +34,8 @@ void RenderView::render()
 
 
     // --------------------------------------
+    Mesh mesh = importFbx("E:/3D Objects/teapot.fbx");
+    QVector<QVector3D> positions = mesh.getPositions();
     Triangle triangle(QVector3D(-8, -4, 0), QVector3D(8, -4, 0), QVector3D(0, 4, 0));
     // --------------------------------------
 

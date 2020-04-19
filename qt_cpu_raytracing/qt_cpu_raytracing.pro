@@ -28,6 +28,7 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
         material.cpp \
+        mesh.cpp \
         ray.cpp \
         renderview.cpp \
         sky.cpp \
@@ -38,6 +39,7 @@ SOURCES += \
 HEADERS += \
         mainwindow.h \
         material.h \
+        mesh.h \
         ray.h \
         renderview.h \
         sky.h \
@@ -58,3 +60,16 @@ LIBS += -fopenmp
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+# Support FBX
+win32:CONFIG(release, debug|release): LIBS += -L'C:/Program Files/Autodesk/FBX/FBX SDK/2020.0.1/lib/vs2017/x64/release/' -llibfbxsdk
+else:win32:CONFIG(debug, debug|release): LIBS += -L'C:/Program Files/Autodesk/FBX/FBX SDK/2020.0.1/lib/vs2017/x64/debug/' -llibfbxsdk
+
+INCLUDEPATH += 'C:/Program Files/Autodesk/FBX/FBX SDK/2020.0.1/include'
+DEPENDPATH += 'C:/Program Files/Autodesk/FBX/FBX SDK/2020.0.1/include'
+
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += 'C:/Program Files/Autodesk/FBX/FBX SDK/2020.0.1/lib/vs2017/x64/release/liblibfbxsdk.a'
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += 'C:/Program Files/Autodesk/FBX/FBX SDK/2020.0.1/lib/vs2017/x64/debug/liblibfbxsdk.a'
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += 'C:/Program Files/Autodesk/FBX/FBX SDK/2020.0.1/lib/vs2017/x64/release/libfbxsdk.lib'
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += 'C:/Program Files/Autodesk/FBX/FBX SDK/2020.0.1/lib/vs2017/x64/debug/libfbxsdk.lib'
+
