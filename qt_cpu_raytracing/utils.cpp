@@ -29,6 +29,19 @@ void orthonormalize(const QVector3D& v1, QVector3D& v2, QVector3D& v3) {
     v3 = cross(v1, v2);
 }
 
+std::tuple<QVector3D, QVector3D, QVector3D> orthonormalize(const QVector3D& v1) {
+    QVector3D v2, v3;
+    if(qAbs(v1.x()) > 0.9)
+        v2 = QVector3D(0, 1, 0); // v2 = y
+    else
+        v2 = QVector3D(1, 0, 0); // v2 = x
+
+    v2 = normalize(v2 - dot(v1, v2)*v1);
+    v3 = cross(v1, v2);
+
+    return std::forward_as_tuple(v1, v2, v3);
+}
+
 //ワールド座標系からローカル座標系に変換する
 QVector3D worldToLocal(const QVector3D& v, const QVector3D& s, const QVector3D& n, const QVector3D& t) {
   return QVector3D(dot(v, s), dot(v, n), dot(v, t));

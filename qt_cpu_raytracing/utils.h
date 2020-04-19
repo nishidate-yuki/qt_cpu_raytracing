@@ -4,6 +4,7 @@
 //#include <stdlib.h>
 #include <QVector3D>
 #include <QVector>
+#include <tuple>
 
 float frand();
 
@@ -14,6 +15,8 @@ QVector3D cross(const QVector3D&, const QVector3D&);
 QVector3D normalize(const QVector3D&);
 
 void orthonormalize(const QVector3D&, QVector3D&, QVector3D&);
+
+std::tuple<QVector3D, QVector3D, QVector3D> orthonormalize(const QVector3D&);
 
 QVector3D worldToLocal(const QVector3D&, const QVector3D&, const QVector3D&, const QVector3D&);
 
