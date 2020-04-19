@@ -23,7 +23,7 @@ public:
     RenderView(QWidget *parent);
 
     void render();
-    QVector3D radiance(Ray&, const QVector<Sphere>&, int&);
+    QVector3D radiance(Ray&, QVector<Sphere>&, int&);
     void setImage(const QVector<QVector<QVector3D>>&);
 
 private:

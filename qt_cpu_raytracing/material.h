@@ -21,6 +21,7 @@ class Diffuse : public Material
 {
 public:
     Diffuse();
+    Diffuse(const QVector3D&);
     ~Diffuse() {}
 
     QVector3D sample(const QVector3D& direction, float& pdf, int& depth) const override;

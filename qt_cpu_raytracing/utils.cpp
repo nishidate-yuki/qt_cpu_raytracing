@@ -31,12 +31,12 @@ std::tuple<QVector3D, QVector3D, QVector3D> orthonormalize(const QVector3D& v1) 
     return std::forward_as_tuple(v1, v2, v3);
 }
 
-//ワールド座標系からローカル座標系に変換する
+// ワールド座標系からローカル座標系に変換する
 QVector3D worldToLocal(const QVector3D& v, const QVector3D& s, const QVector3D& n, const QVector3D& t) {
   return QVector3D(dot(v, s), dot(v, n), dot(v, t));
 }
 
-//ローカル座標系からワールド座標系に変換する
+// ローカル座標系からワールド座標系に変換する
 QVector3D localToWorld(const QVector3D& v, const QVector3D& s, const QVector3D& n, const QVector3D& t) {
   QVector3D a(s.x(), n.x(), t.x());
   QVector3D b(s.y(), n.y(), t.y());

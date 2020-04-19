@@ -3,7 +3,7 @@
 
 #include <QVector3D>
 #include "material.h"
-#include "sphere.h"
+//#include "sphere.h"
 
 struct Intersection {
     float distance;
@@ -18,9 +18,6 @@ class Ray {
 public:
     Ray(const QVector3D&);
     Ray(const QVector3D&, const QVector3D&);
-
-    bool intersect(const Sphere&, Intersection&);
-    bool intersectScene(const QVector<Sphere>&, Intersection&);
 
     QVector3D origin;
     QVector3D direction;

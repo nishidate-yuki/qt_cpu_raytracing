@@ -11,6 +11,11 @@ Diffuse::Diffuse()
     emission = QVector3D(0, 0, 0);
 }
 
+Diffuse::Diffuse(const QVector3D& color)
+{
+    scatter = color;
+}
+
 QVector3D Diffuse::sample(const QVector3D &direction, float &pdf, int& depth) const
 {
     // この関数の中はすべてローカル座標系と考えていい

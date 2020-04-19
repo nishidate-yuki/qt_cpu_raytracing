@@ -27,9 +27,9 @@ void RenderView::render()
     QVector3D cameraPosition(0, 2, 25);
 
     QVector<Sphere> scene;
-    scene << Sphere(QVector3D(10, 0, 0), 4, std::make_shared<Light>());
-    scene << Sphere(QVector3D(-10, 0, 0), 4, std::make_shared<Diffuse>());
-    scene << Sphere(QVector3D(0, 0, 0), 4, std::make_shared<Mirror>());
+    scene << Sphere(QVector3D( 10, 0, 0),  4, std::make_shared<Light>());
+    scene << Sphere(QVector3D(-10, 0, 0), 4, std::make_shared<Diffuse>(QVector3D(1, 0, 0)));
+    scene << Sphere(QVector3D(  0, 0, 0),   4, std::make_shared<Mirror>());
     scene << Sphere(QVector3D(0, -10004, 0), 10000, std::make_shared<Diffuse>());
 
     #pragma omp parallel for schedule(dynamic, 1)
@@ -62,13 +62,13 @@ void RenderView::render()
 }
 
 
-QVector3D RenderView::radiance(Ray& ray, const QVector<Sphere>& scene, int& depth)
+QVector3D RenderView::radiance(Ray& ray, QVector<Sphere>& scene, int& depth)
 {
     static IBL sky("E:/Pictures/Textures/_HDRI/4k/rural_landscape_4k.hdr");
 
     // シーンとの交差判定
     Intersection intersection;
-    if(!ray.intersectScene(scene, intersection)) return sky.getRadiance(ray);
+    if(!intersectScene(ray, scene, intersection)) return sky.getRadiance(ray);
 
     // Hitした情報を取得
     Sphere sphere = scene[intersection.objectIndex];
@@ -96,7 +96,7 @@ QVector3D RenderView::radiance(Ray& ray, const QVector<Sphere>& scene, int& dept
 
     // 最終的なレンダリング方程式
     // Lo = Le + (BRDF * Li * cosθ)/pdf = Le + weight*Li
-            return sphere.material->emission + weight * inRandiance;
+    return sphere.material->emission + weight * inRandiance;
 }
 
 void RenderView::setImage(const QVector<QVector<QVector3D>>& fImage)

@@ -9,16 +9,22 @@
 #include <memory>
 #include <typeinfo>
 #include "material.h"
+#include "ray.h"
+
 
 class Sphere
 {
 public:
-    Sphere(const QVector3D& center, const float& radius);
-    Sphere(const QVector3D& center, const float& radius, const std::shared_ptr<Material>& material);
+    Sphere(const QVector3D&, const float&);
+    Sphere(const QVector3D&, const float&, const std::shared_ptr<Material>&);
+
+    bool intersect(const Ray&, Intersection&);
 
     QVector3D center;
     float radius;
     std::shared_ptr<Material> material;
 };
+
+bool intersectScene(const Ray&, QVector<Sphere>&, Intersection&);
 
 #endif // SPHERE_H
