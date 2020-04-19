@@ -5,15 +5,6 @@
 #include "material.h"
 #include "sphere.h"
 
-struct Hitpoint{
-    float distance;
-    QVector3D position;
-    QVector3D normal;
-//    int material;
-
-    Hitpoint() : distance(FLT_MAX), position(), normal() {}
-};
-
 struct Intersection {
     float distance;
     QVector3D position;
@@ -22,19 +13,6 @@ struct Intersection {
 
     Intersection() : distance(FLT_MAX), objectIndex(-1) {}
 };
-
-//struct Intersection {
-//    Hitpoint hitpoint;
-//    int objectIndex;
-
-//    Intersection() : objectIndex(-1) {}
-//};
-
-
-//const Sphere scene[] = {
-//    Sphere{QVector3D(0, 0, 0), 7}
-//};
-
 
 class Ray {
 public:

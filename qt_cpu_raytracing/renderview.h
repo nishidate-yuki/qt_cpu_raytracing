@@ -10,7 +10,6 @@
 #include <QtMath>
 #include <QElapsedTimer>
 #include <omp.h>
-
 #include "ray.h"
 #include "utils.h"
 #include "sky.h"
@@ -30,7 +29,6 @@ private:
     QGraphicsScene* graphicsScene;
     QGraphicsPixmapItem* pixmapItem;
     QImage* image;
-//    IBL* sky;
 };
 
 #endif // RENDERVIEW_H

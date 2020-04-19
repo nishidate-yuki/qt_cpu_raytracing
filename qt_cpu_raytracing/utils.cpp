@@ -18,17 +18,6 @@ QVector3D normalize(const QVector3D& v){
 }
 
 // 正規直交化
-// v1 -> (v1, v2, v3)
-void orthonormalize(const QVector3D& v1, QVector3D& v2, QVector3D& v3) {
-    if(qAbs(v1.x()) > 0.9)
-        v2 = QVector3D(0, 1, 0); // v2 = y
-    else
-        v2 = QVector3D(1, 0, 0); // v2 = x
-
-    v2 = normalize(v2 - dot(v1, v2)*v1);
-    v3 = cross(v1, v2);
-}
-
 std::tuple<QVector3D, QVector3D, QVector3D> orthonormalize(const QVector3D& v1) {
     QVector3D v2, v3;
     if(qAbs(v1.x()) > 0.9)

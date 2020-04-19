@@ -10,18 +10,11 @@
 #include <typeinfo>
 #include "material.h"
 
-//struct Sphere {
-//    QVector3D center;
-//    float radius;
-//    QSharedPointer<Material> material;
-//};
-
 class Sphere
 {
 public:
     Sphere(const QVector3D& center, const float& radius);
     Sphere(const QVector3D& center, const float& radius, const std::shared_ptr<Material>& material);
-//    Sphere(const QVector3D& center, const float& radius, Material* material);
 
     QVector3D center;
     float radius;

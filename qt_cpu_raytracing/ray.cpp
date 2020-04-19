@@ -35,21 +35,6 @@ bool Ray::intersect(const Sphere &sphere, Intersection& hitpoint)
     float t2 = -b + sqrt(discriminant); // big t
 
     // Rayの後ろ方向でヒットしていても更新しない
-    // 既にもっと近い地点でヒットしていたら更新しない
-//    if(0 < t1 && t1 < hitpoint.distance){
-//        hitpoint.distance = t1;
-//        hitpoint.position = origin + t1 * direction;
-//        hitpoint.normal = (hitpoint.position - sphere.center).normalized();
-//        return true;
-//    }
-//    if(0 < t2 && t2 < hitpoint.distance){
-//        hitpoint.distance = t2;
-//        hitpoint.position = origin + t2 * direction;
-//        hitpoint.normal = (hitpoint.position - sphere.center).normalized();
-//        return true;
-//    }
-
-    // Rayの後ろ方向でヒットしていても更新しない
     // 既にもっと近い地点でヒットしているかは無視する
     if(0 < t1){
         hitpoint.distance = t1;

@@ -1,7 +1,6 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-//#include <stdlib.h>
 #include <QVector3D>
 #include <QVector>
 #include <tuple>

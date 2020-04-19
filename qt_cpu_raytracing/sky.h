@@ -7,7 +7,6 @@
 
 class Sky {
   public:
-//    virtual ~Sky();
     // 放射輝度の値を返す
     virtual QVector3D getRadiance(const Ray& ray) const = 0;
 };

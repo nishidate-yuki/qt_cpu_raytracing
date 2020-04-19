@@ -9,15 +9,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 }
 
-void MainWindow::render(){
-
-    QEventLoop loop;
-    QTimer::singleShot(2000, &loop, SLOT(quit()));
-    loop.exec();
-
-    ui->graphicsView->render();
-}
-
 MainWindow::~MainWindow()
 {
     delete ui;

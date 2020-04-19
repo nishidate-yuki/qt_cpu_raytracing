@@ -117,6 +117,6 @@ QVector3D RenderView::radiance(Ray& ray, const QVector<Sphere>& spheres, int& de
 
     // 最終的なレンダリング方程式
     // Lo = Le + (BRDF * Li * cosθ)/pdf = Le + wieght*Li
-    return sphere.material->emission + weight*inRandiance;
+    return sphere.material->emission + weight * inRandiance;
 
 }
