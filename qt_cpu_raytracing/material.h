@@ -13,6 +13,10 @@ public:
     virtual QVector3D sample(const QVector3D& direction, float& pdf, int& depth) const = 0;
     virtual QVector3D getWeight(const QVector3D& direction, float& theta) const = 0;
 
+    QVector3D getScatter() {return scatter;}
+    QVector3D getEmission() {return emission;}
+
+protected:
     QVector3D scatter;
     QVector3D emission;
 };

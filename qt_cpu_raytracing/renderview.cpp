@@ -91,12 +91,12 @@ QVector3D RenderView::radiance(Ray& ray, QVector<Sphere>& scene, int& depth)
     ray.direction = localToWorld(localDirection, s, n, t);
 
     // 再帰でradiance取得
-    if(depth > DEPTH) return sphere.material->emission;
+    if(depth > DEPTH) return sphere.material->getEmission();
     QVector3D inRandiance = radiance(ray, scene, depth);
 
     // 最終的なレンダリング方程式
     // Lo = Le + (BRDF * Li * cosθ)/pdf = Le + weight*Li
-    return sphere.material->emission + weight * inRandiance;
+    return sphere.material->getEmission() + weight * inRandiance;
 }
 
 void RenderView::setImage(const QVector<QVector<QVector3D>>& fImage)
