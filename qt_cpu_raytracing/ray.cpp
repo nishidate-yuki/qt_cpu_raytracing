@@ -3,17 +3,13 @@
 
 Ray::Ray(const QVector3D& o)
     : origin(o),
-      direction(-o),
-      scatter(1.0, 1.0, 1.0),
-      emission(0, 0, 0)
+      direction(-o)
 {
 
 }
 
 Ray::Ray(const QVector3D& o, const QVector3D& d)
     : origin(o),
-      direction(d.normalized()),
-      scatter(1.0, 1.0, 1.0),
-      emission(0, 0, 0)
+      direction(d.normalized())
 {
 }

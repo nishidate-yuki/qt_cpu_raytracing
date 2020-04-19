@@ -21,8 +21,6 @@ public:
 
     QVector3D origin;
     QVector3D direction;
-    QVector3D scatter;
-    QVector3D emission;
 };
 
 #endif // RAY_H
