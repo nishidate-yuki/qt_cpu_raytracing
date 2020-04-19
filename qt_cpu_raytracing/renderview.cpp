@@ -32,6 +32,11 @@ void RenderView::render()
     scene << Sphere(QVector3D(  0, 0, 0),   4, std::make_shared<Mirror>());
     scene << Sphere(QVector3D(0, -10004, 0), 10000, std::make_shared<Diffuse>());
 
+
+    // --------------------------------------
+    Triangle triangle(QVector3D(-8, -4, 0), QVector3D(8, -4, 0), QVector3D(0, 4, 0));
+    // --------------------------------------
+
     #pragma omp parallel for schedule(dynamic, 1)
     for (int h=0; h<height; h++) {
         for (int w=0; w<width; w++) {
@@ -47,9 +52,18 @@ void RenderView::render()
                 Ray ray(cameraPosition);
                 ray.direction = (screenPosition - cameraPosition).normalized();
 
+                // --------------------------------------
+                Intersection intersection;
+                if(triangle.intersect(ray, intersection)){
+                    fColor += QVector3D(1, 1, 1);
+                }else{
+                    fColor += QVector3D(1, 0, 1);
+                }
+                // --------------------------------------
+
                 // radianceを計算
-                int depth = 0;
-                fColor += radiance(ray, scene, depth);
+//                int depth = 0;
+//                fColor += radiance(ray, scene, depth);
             }
             fImage[h].append(fColor/NUM_SAMPLES);
         }

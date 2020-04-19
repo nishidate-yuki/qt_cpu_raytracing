@@ -24,7 +24,6 @@ class UniformSky : public Sky {
 // 大気色のSky
 class SimpleSky : public Sky {
   public:
-
     QVector3D getRadiance(const Ray& ray) const;
 };
 

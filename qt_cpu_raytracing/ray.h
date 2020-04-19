@@ -3,7 +3,6 @@
 
 #include <QVector3D>
 #include "material.h"
-//#include "sphere.h"
 
 struct Intersection {
     float distance;

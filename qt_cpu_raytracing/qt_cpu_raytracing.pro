@@ -32,6 +32,7 @@ SOURCES += \
         renderview.cpp \
         sky.cpp \
         sphere.cpp \
+        triangle.cpp \
         utils.cpp
 
 HEADERS += \
@@ -42,6 +43,7 @@ HEADERS += \
         sky.h \
         sphere.h \
         stb_image.h \
+        triangle.h \
         utils.h
 
 FORMS += \
