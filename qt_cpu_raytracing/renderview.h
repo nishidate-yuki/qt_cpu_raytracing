@@ -24,6 +24,7 @@ public:
 
     void render();
     QVector3D radiance(Ray&, const QVector<Sphere>&, int&);
+    void setImage(const QVector<QVector<QVector3D>>&);
 
 private:
     QGraphicsScene* graphicsScene;

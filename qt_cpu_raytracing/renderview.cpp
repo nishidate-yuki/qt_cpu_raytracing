@@ -1,23 +1,25 @@
 #include "renderview.h"
 
-const int NUM_SAMPLES = 200;
+const int NUM_SAMPLES = 20;
 constexpr int DEPTH = 8;
 
 RenderView::RenderView(QWidget *parent)
     : QGraphicsView(parent)
 {
+    graphicsScene = new QGraphicsScene();
+    setScene(graphicsScene);
+
+    QElapsedTimer timer;
+    timer.start();
     render();
+    qDebug() << timer.elapsed() << "ms";
 }
 
 void RenderView::render()
 {
-    QElapsedTimer timer;
-    timer.start();
-
     // image setting
     constexpr int width = 320;
     constexpr int height = 180;
-    image = new QImage(width, height, QImage::Format_RGB32);
     QVector<QVector<QVector3D>> fImage(height);
 
     const double screenWidth = 15.0 * width / height;
@@ -35,17 +37,17 @@ void RenderView::render()
         for (int w=0; w<width; w++) {
             QVector3D fColor(0, 0, 0);
             for (int n=0; n<NUM_SAMPLES; n++) {
-                // calc screenPosition
+                // screenPositionを計算
                 QVector3D screenPosition;
                 screenPosition[0] = (w+frand())/width * screenWidth - screenWidth/2.0;
                 screenPosition[1] = (height-(h+frand()))/height * screenHeight - screenHeight/2.0;
                 screenPosition[2] = cameraPosition[2] - 20;
 
-                // generate ray
+                // rayを生成
                 Ray ray(cameraPosition);
                 ray.direction = (screenPosition - cameraPosition).normalized();
 
-                // calc radiance
+                // radianceを計算
                 int depth = 0;
                 fColor += radiance(ray, scene, depth);
             }
@@ -54,34 +56,9 @@ void RenderView::render()
         qDebug() << h;
     }
 
-
     gammaCorrection(fImage);
 
-    for (int h=0; h<height; h++) {
-        for (int w=0; w<width; w++) {
-            QVector3D& fColor = fImage[h][w];
-
-            QColor color;
-            color.setRgbF(qBound(0.0f, fColor.x(), 1.0f),
-                          qBound(0.0f, fColor.y(), 1.0f),
-                          qBound(0.0f, fColor.z(), 1.0f));
-            image->setPixelColor(w, h, color);
-        }
-    }
-
-    graphicsScene = new QGraphicsScene();
-    pixmapItem = new QGraphicsPixmapItem(QPixmap::fromImage(*image));
-
-    graphicsScene->addItem(pixmapItem);
-
-    setScene(graphicsScene);
-    setMinimumSize(qMin(width+2, 1280), qMin(height+2, 720));
-    setMaximumSize(qMin(width+2, 1280), qMin(height+2, 720));
-    show();
-    image->save("E:/Desktop/dev/render.png");
-
-    qDebug() << timer.elapsed() << "ms";
-
+    setImage(fImage);
 }
 
 
@@ -118,7 +95,34 @@ QVector3D RenderView::radiance(Ray& ray, const QVector<Sphere>& scene, int& dept
     QVector3D inRandiance = radiance(ray, scene, depth);
 
     // 最終的なレンダリング方程式
-    // Lo = Le + (BRDF * Li * cosθ)/pdf = Le + wieght*Li
-    return sphere.material->emission + weight * inRandiance;
+    // Lo = Le + (BRDF * Li * cosθ)/pdf = Le + weight*Li
+            return sphere.material->emission + weight * inRandiance;
+}
+
+void RenderView::setImage(const QVector<QVector<QVector3D>>& fImage)
+{
+    int width = fImage[0].size();
+    int height = fImage.size();
+
+    // set image to graphicsView
+    image = new QImage(width, height, QImage::Format_RGB32);
+    for (int h=0; h<height; h++) {
+        for (int w=0; w<width; w++) {
+            QVector3D fColor = fImage[h][w];
+
+            QColor color;
+            color.setRgbF(qBound(0.0f, fColor.x(), 1.0f),
+                          qBound(0.0f, fColor.y(), 1.0f),
+                          qBound(0.0f, fColor.z(), 1.0f));
+            image->setPixelColor(w, h, color);
+        }
+    }
+    pixmapItem = new QGraphicsPixmapItem(QPixmap::fromImage(*image));
+    graphicsScene->addItem(pixmapItem);
+
+    setMinimumSize(qMin(width+2, 1280), qMin(height+2, 720));
+    setMaximumSize(qMin(width+2, 1280), qMin(height+2, 720));
+    show();
+    image->save("E:/Desktop/dev/render.png");
 }
 
