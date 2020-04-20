@@ -91,16 +91,6 @@ std::tuple<QVector3D, QVector3D> Diffuse::sample(const QVector3D &direction, int
     return {{x, y, z}, scatter};
 }
 
-QVector3D Diffuse::getWeight(const QVector3D &direction, float &theta) const
-{
-    // レンダリング方程式の第2項の中の、Li以外の部分を返す
-    //    BRDF * cosθ / pdf
-    // = (ρ/π) * cosθ / (π/cosθ)
-    // = ρ
-    // ρ : 反射率。ここではscatter
-    return scatter;
-}
-
 // Mirror
 Mirror::Mirror()
 {
@@ -112,16 +102,6 @@ std::tuple<QVector3D, QVector3D> Mirror::sample(const QVector3D &direction, int 
 {
     depth++;
     return {reflect(direction, QVector3D(0, 1, 0)), scatter};
-}
-
-QVector3D Mirror::getWeight(const QVector3D &direction, float &theta) const
-{
-    // レンダリング方程式の第2項の中の、Li以外の部分を返す
-    //    BRDF * cosθ / pdf
-    // = (1*ρ) * cosθ / (π/cosθ)
-    // = ρ
-    // ρ : 反射率。ここではscatter
-    return scatter;
 }
 
 // Light
@@ -140,11 +120,6 @@ std::tuple<QVector3D, QVector3D> Light::sample(const QVector3D &direction, int &
 {
     depth = INT_MAX;
     return {{0, 0, 0}, {0, 0, 0}};
-}
-
-QVector3D Light::getWeight(const QVector3D &direction, float &theta) const
-{
-    return QVector3D(0, 0, 0);
 }
 
 //// Glass

@@ -104,6 +104,7 @@ QVector3D RenderView::radiance(Ray& ray, Mesh& mesh, int& depth)
     // world座標 -> local座標
     QVector3D localDirection = worldToLocal(-ray.direction, s, n, t);
 
+    // rayの方向とweightを計算する
     auto [nextDirection, weight] = mesh.material->sample(localDirection, depth);
 
     // ray更新
@@ -136,6 +137,7 @@ QVector3D RenderView::radiance(Ray& ray, QVector<Sphere>& scene, int& depth)
     // world座標 -> local座標
     QVector3D localDirection = worldToLocal(-ray.direction, s, n, t);
 
+    // rayの方向とweightを計算する
     auto [nextDirection, weight] = sphere.material->sample(localDirection, depth);
 
     // ray更新
