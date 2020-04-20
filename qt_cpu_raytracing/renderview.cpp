@@ -2,7 +2,7 @@
 
 #include <omp.h>
 
-const int NUM_SAMPLES = 100;
+const int NUM_SAMPLES = 10;
 constexpr int DEPTH = 8;
 
 RenderView::RenderView(QWidget *parent)
@@ -62,8 +62,8 @@ void RenderView::render()
     mesh.setMaterial(std::make_shared<Diffuse>(QVector3D(199/255.0f, 241/255.0f, 255/255.0f)));
     // --------------------------------------
 
-    //#pragma omp parallel for
-    #pragma omp parallel for schedule(dynamic, 1)
+//    #pragma omp parallel for schedule(dynamic, 1)
+    #pragma omp parallel for
     for (int h=0; h<height; h++) {
         for (int w=0; w<width; w++) {
             QVector3D fColor(0, 0, 0);
@@ -80,11 +80,11 @@ void RenderView::render()
 
                 int depth = 0;
                 // --------------------------------------
-//                fColor += radiance(ray, mesh, depth);
+                fColor += radiance(ray, mesh, depth);
                 // --------------------------------------
 
                 // radianceを計算
-                fColor += radiance(ray, scene, depth);
+//                fColor += radiance(ray, scene, depth);
             }
 //            fImage[h].append(fColor/NUM_SAMPLES);
             fImage[h][w] = (fColor/NUM_SAMPLES);
@@ -106,9 +106,6 @@ QVector3D RenderView::radiance(Ray& ray, Mesh& mesh, int& depth)
     // シーンとの交差判定
     Intersection intersection;
     if(!mesh.intersect(ray, intersection)) return sky.getRadiance(ray);
-
-    // Hitした情報を取得
-    Triangle triangle = mesh.getTriangles()[intersection.objectIndex];
 
     // ローカル座標系 (s, n, t) を作る
     auto [n, s, t] = orthonormalize(intersection.normal);
