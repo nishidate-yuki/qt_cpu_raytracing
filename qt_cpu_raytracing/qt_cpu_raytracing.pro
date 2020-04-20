@@ -50,10 +50,18 @@ HEADERS += \
 
 FORMS += \
         mainwindow.ui
-
-QMAKE_LFLAGS += -fopenmp
-QMAKE_CXXFLAGS += -fopenmp
-LIBS += -fopenmp
+# ---------------------------
+#QMAKE_LFLAGS += -fopenmp
+#QMAKE_CXXFLAGS += -fopenmp
+#LIBS += -fopenmp
+# ---------------------------
+# ---------------------------
+QMAKE_LFLAGS += -openmp
+QMAKE_CXXFLAGS += -openmp
+#LIBS += -fopenmp
+# ---------------------------
+#QMAKE_CXXFLAGS += -fopenmp -O3 -mtune=native -march=native
+#QMAKE_CXXFLAGS += -O3
 
 
 # Default rules for deployment.

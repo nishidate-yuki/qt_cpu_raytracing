@@ -9,7 +9,6 @@
 #include <QRandomGenerator>
 #include <QtMath>
 #include <QElapsedTimer>
-#include <omp.h>
 #include "ray.h"
 #include "utils.h"
 #include "sky.h"
@@ -25,6 +24,7 @@ public:
     RenderView(QWidget *parent);
 
     void render();
+    QVector3D radiance(Ray& ray, Mesh& mesh, int& depth);
     QVector3D radiance(Ray&, QVector<Sphere>&, int&);
     void setImage(const QVector<QVector<QVector3D>>&);
 

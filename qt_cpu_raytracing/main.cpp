@@ -3,6 +3,9 @@
 #include <QStyleFactory>
 #include <QtDebug>
 
+#include <omp.h>
+#include <QElapsedTimer>
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -32,6 +35,30 @@ int main(int argc, char *argv[])
 
     MainWindow w;
     w.show();
+
+//    QElapsedTimer timer;
+//    timer.start();
+//    qDebug() << "start: ";
+//    constexpr int N = 50000;
+//    int aa[N] = {0};
+////    int bb[N] = {0};
+
+//    int i,j;
+//    long sum = 0;
+
+//    #pragma omp parallel num_threads(4)
+//    qDebug() << "hello";
+
+//    #pragma omp parallel for
+//    for (i=0; i<N; i++) {
+//        aa[i] = 1;
+//        for (j=0; j<N; j++) {
+//            sum += aa[j];
+//        }
+//    }
+
+//    qDebug() << "sum: " << sum;
+//    qDebug() << "fin: " << timer.elapsed();
 
     return a.exec();
 }

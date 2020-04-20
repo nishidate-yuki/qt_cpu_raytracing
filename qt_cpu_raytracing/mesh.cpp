@@ -5,6 +5,12 @@ Mesh::Mesh()
 
 }
 
+Mesh::Mesh(const std::shared_ptr<Material> &material)
+    : material(material)
+{
+
+}
+
 Mesh::~Mesh()
 {
     qDebug() << "Mesh destroyed";
@@ -25,8 +31,39 @@ void Mesh::setIndices(const QVector<int>& indices)
     this->indices = indices;
 }
 
+void Mesh::createTriangles()
+{
+    qDebug() << "indices size" << indices.size();
+//    Triangle triangle(positions[0], positions[1], positions[2]);
+//    triangles.append(triangle);
+    for (int i=0; i<indices.size(); i += 3) {
+        Triangle triangle(positions[indices[i]], positions[indices[i+1]], positions[indices[i+2]]);
+        triangles.append(triangle);
+    }
+}
 
-Mesh importFbx(const char* filename)
+bool Mesh::intersect(const Ray &ray, Intersection &intersection)
+{
+    for (int i=0; i<triangles.size(); i++) {
+        Intersection hitpoint;
+        if(triangles[i].intersect(ray, hitpoint)){
+            if(hitpoint.distance < intersection.distance){
+                intersection = hitpoint;
+                intersection.objectIndex = i;
+            }
+        }
+    }
+
+    return intersection.objectIndex != -1;
+}
+
+void Mesh::setMaterial(const std::shared_ptr<Material> &material)
+{
+    this->material = material;
+}
+
+
+Mesh importFbx(const char* filename, const float scale, const QVector3D& offset)
 {
 
     // メモリ管理を行うmanagerを初期化
@@ -82,7 +119,8 @@ Mesh importFbx(const char* filename)
     QVector<QVector3D> positions;
     QVector<Vertex> vertices;
     for (int i = 0; i < numPosition; ++i){
-        QVector3D pos(position[i][0]/200.0f, position[i][1]/200.0f, position[i][2]/200.0f);
+        QVector3D pos(position[i][0]*scale, position[i][1]*scale, position[i][2]*scale);
+        pos += offset;
         positions.append(pos);
         Vertex v;
         v.position = pos;
@@ -110,6 +148,7 @@ Mesh importFbx(const char* filename)
     mesh.setVertices(vertices);
     mesh.setPositions(positions);
     mesh.setIndices(indices);
+    mesh.createTriangles();
 
     // managerと管理しているオブジェクトを全て破棄する
     manager->Destroy();
