@@ -107,8 +107,8 @@ QVector3D RenderView::radiance(Ray& ray, Mesh& mesh, int& depth)
     auto [nextDirection, weight] = mesh.material->sample(localDirection, depth);
 
     // ray更新
-    ray.origin = intersection.position /*+ intersection.normal * 0.001f*/;
     ray.direction = localToWorld(nextDirection, s, n, t);
+    ray.origin = intersection.position + ray.direction * 0.001f;
 
     // 再帰でradiance取得
     if(depth > DEPTH) return mesh.material->getEmission();
@@ -139,8 +139,8 @@ QVector3D RenderView::radiance(Ray& ray, QVector<Sphere>& scene, int& depth)
     auto [nextDirection, weight] = sphere.material->sample(localDirection, depth);
 
     // ray更新
-    ray.origin = intersection.position + intersection.normal * 0.001f;
     ray.direction = localToWorld(nextDirection, s, n, t);
+    ray.origin = intersection.position + ray.direction * 0.001f;
 
     // 再帰でradiance取得
     if(depth > DEPTH) return sphere.material->getEmission();

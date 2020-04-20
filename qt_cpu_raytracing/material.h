@@ -16,6 +16,7 @@ class Material
 public:
     // dir, weight を返す
     virtual std::tuple<QVector3D, QVector3D> sample(const QVector3D& direction, int& depth) = 0;
+//    virtual std::tuple<QVector3D, QVector3D> sample(const QVector3D& direction, int& depth) = 0;
     virtual QVector3D getWeight(const QVector3D& direction, float& theta) const = 0;
 
     QVector3D getScatter() {return scatter;}
