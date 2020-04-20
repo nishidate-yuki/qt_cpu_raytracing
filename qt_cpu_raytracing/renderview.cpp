@@ -136,16 +136,11 @@ QVector3D RenderView::radiance(Ray& ray, QVector<Sphere>& scene, int& depth)
     // world座標 -> local座標
     QVector3D localDirection = worldToLocal(-ray.direction, s, n, t);
 
-    // 次のrayのサンプル取得
-    float pdf, theta; // 現在の実装では必要ない
-    localDirection = sphere.material->sample(localDirection, pdf, depth);
-
-    // (BRDF * cosθ / pdf) の取得
-    QVector3D weight = sphere.material->getWeight(localDirection, theta);
+    auto [nextDirection, weight] = sphere.material->sample(localDirection, depth);
 
     // ray更新
     ray.origin = intersection.position + intersection.normal * 0.001f;
-    ray.direction = localToWorld(localDirection, s, n, t);
+    ray.direction = localToWorld(nextDirection, s, n, t);
 
     // 再帰でradiance取得
     if(depth > DEPTH) return sphere.material->getEmission();
