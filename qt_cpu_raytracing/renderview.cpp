@@ -1,6 +1,6 @@
 #include "renderview.h"
 
-const int NUM_SAMPLES = 2000;
+const int NUM_SAMPLES = 20;
 constexpr int DEPTH = 32;
 
 RenderView::RenderView(QWidget *parent)
@@ -18,11 +18,11 @@ RenderView::RenderView(QWidget *parent)
 void RenderView::render()
 {
     // image setting
-//    constexpr int width = 640;
-//    constexpr int height = 360;
+    constexpr int width = 640;
+    constexpr int height = 360;
 
-    constexpr int width = 480;
-    constexpr int height = 480;
+//    constexpr int width = 480;
+//    constexpr int height = 480;
 
     auto fImage = createImage(width, height);
 
@@ -54,8 +54,9 @@ void RenderView::render()
 
     // Mesh
     Mesh mesh = importFbx("E:/3D Objects/bunny.fbx", 13.0f);
-    QVector3D lightBlue(199/255.0f, 241/255.0f, 255/255.0f);
-    mesh.setMaterial(std::make_shared<Diffuse>(lightBlue));
+//    QVector3D lightBlue(199/255.0f, 241/255.0f, 255/255.0f);
+//    mesh.setMaterial(std::make_shared<Diffuse>(lightBlue));
+    mesh.setMaterial(std::make_shared<Glass>());
 
     #pragma omp parallel for schedule(dynamic, 1)
     for (int h=0; h<height; h++) {
@@ -74,9 +75,9 @@ void RenderView::render()
 
                 // radianceを計算
                 int depth = 0;
-//                fColor += radiance(ray, mesh, depth);
+                fColor += radiance(ray, mesh, depth);
 //                fColor += radiance(ray, scene, depth);
-                fColor += radiance(ray, cornellBox, depth);
+//                fColor += radiance(ray, cornellBox, depth);
             }
             fImage[h][w] = (fColor/NUM_SAMPLES);
 

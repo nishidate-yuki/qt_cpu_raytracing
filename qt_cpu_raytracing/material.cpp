@@ -31,8 +31,6 @@ bool totalReflect(const QVector3D& v, float n1, float n2){
     // snellの法則から
     // n1 * sin(θ1) = n2 * sin(90°)
     //      sin(θ1) = n2 / n1
-//    float criticalAngle = asin(n2 / n1);
-//    return theta(v) > criticalAngle;
 
     float cos = absCosTheta(v);
     float sin = sqrt(qMax(1 - cos*cos, 0.0f));
@@ -49,22 +47,6 @@ QVector3D refract(const QVector3D& v, const QVector3D& n, float n1, float n2) {
     // 屈折ベクトル
     return n1/n2 * (-v + dot(v, n)*n) - sqrt(1 - alpha*alpha)*n;
 }
-
-//bool refract(const QVector3D& v, QVector3D& r, const QVector3D& n, float n1, float n2) {
-//  float cos = absCosTheta(v);
-//  float sin = sqrt(qMax(1 - cos*cos, 0.0f));
-//  float alpha = n1/n2 * sin;
-
-//  //全反射
-//  if(alpha*alpha > 1.0) return false;
-
-//  //屈折ベクトル
-//  r = n1/n2 * (-v + dot(v, n)*n) - sqrt(1 - alpha*alpha)*n;
-
-//  return true;
-//}
-
-
 
 // Diffuse
 Diffuse::Diffuse()
@@ -173,57 +155,4 @@ std::tuple<QVector3D, QVector3D> Glass::sample(const QVector3D& direction, int& 
         weight *= pow(n1/n2, 2.0);
         return {reflectDir, weight};
     }
-
-//    // 反射
-//    if(frand() < fr) {
-//        wi = reflect(wo, normal);
-//        pdf = fr;
-//        return fr/absCosTheta(wi) * Vec3(1);
-//    }
-//    //屈折
-//    else {
-//        if(refract(wo, wi, normal, n1, n2)) {
-//            pdf = 1 - fr;
-//            return std::pow(n1/n2, 2.0) * (1 - fr)/absCosTheta(wi) * Vec3(1);
-//        }
-//        //全反射
-//        else {
-//            wi = reflect(wo, normal);
-//            pdf = 1 - fr;
-//            return (1 - fr)/absCosTheta(wi) * Vec3(1);
-//        }
-//    }
-
 }
-
-//QVector3D Glass::getWeight(const QVector3D &direction, float &theta) const
-//{
-//    QVector3D normal(0, 1, 0);
-//    const bool isEntering = dot(direction, normal) > 0;
-
-//    // 屈折率
-//    float n1 = 1.0; // 入射側
-//    float n2 = ior; // 出射側
-
-//    // 物体から出ていく方向であればnormalを反転
-//    // 屈折率も逆にする
-//    if(!isEntering){
-//        normal = {0, -1, 0};
-//        n1 = ior;
-//        n2 = 1.0;
-//    }
-
-//    if(res == 0){
-//        return scatter;
-////        return (1 - fresnelReflectance)/absCosTheta(direction) * QVector3D{1, 1, 1};
-//    }else if(res == 1){
-////        return scatter / fresnelReflectance;
-//        return scatter * fresnelReflectance;
-////        return fresnelReflectance/absCosTheta(direction) * QVector3D{1, 1, 1};
-//    }else{
-////        return scatter / (1.0 - fresnelReflectance);
-//        return scatter * (1.0 - fresnelReflectance);
-////        return std::pow(n1/n2, 2.0) * (1 - fresnelReflectance)/absCosTheta(direction) * QVector3D{1, 1, 1};
-//    }
-
-//}
