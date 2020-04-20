@@ -4,12 +4,6 @@ float absCosTheta(const QVector3D& v) {
     return abs(v.normalized().y());
 }
 
-//float sinTheta(const QVector3D& v) {
-//    QVector3D u = v.normalized();
-//    u[1] = 0; // x, z平面に投影
-//    return u.length();
-//}
-
 float theta(const QVector3D& v){
     return acos(v.normalized().y());
 }
