@@ -69,7 +69,7 @@ QVector3D refract(const QVector3D& v, const QVector3D& n, float n1, float n2) {
 // Diffuse
 Diffuse::Diffuse()
 {
-    scatter = QVector3D(1.0, 1.0, 1.0);
+    scatter = QVector3D(0.9, 0.9, 0.9);
     emission = QVector3D(0, 0, 0);
 }
 
@@ -122,72 +122,79 @@ std::tuple<QVector3D, QVector3D> Light::sample(const QVector3D &direction, int &
     return {{0, 0, 0}, {0, 0, 0}};
 }
 
-//// Glass
-//Glass::Glass()
-//    : ior(1.5)
-//{
-//    scatter = {1, 1, 1};
-//    emission = {0, 0, 0};
-//}
+// Glass
+Glass::Glass()
+    : ior(1.5)
+{
+    scatter = {1, 1, 1};
+    emission = {0, 0, 0};
+}
 
-//QVector3D Glass::sample(const QVector3D &direction, float &pdf, int &depth)
-//{
-//    QVector3D normal(0, 1, 0);
-//    const bool isEntering = dot(direction, normal) > 0;
+std::tuple<QVector3D, QVector3D> Glass::sample(const QVector3D& direction, int& depth)
+{
+    depth++;
 
-//    // 屈折率
-//    float n1 = 1.0; // 入射側
-//    float n2 = ior; // 出射側
+    QVector3D normal(0, 1, 0);
+    const bool isEntering = dot(direction, normal) > 0;
 
-//    // 物体から出ていく方向であればnormalを反転
-//    // 屈折率も逆にする
-//    if(!isEntering){
-//        normal = {0, -1, 0};
-//        n1 = ior;
-//        n2 = 1.0;
-//    }
+    // 屈折率
+    float n1 = 1.0; // 入射側
+    float n2 = ior; // 出射側
 
-//    // 全反射
-//    if(totalReflect(direction, n1, n2)){
-//        res = 0;
-//        return reflect(direction, {0, 1, 0});
-//    }
+    // 物体から出ていく方向であればnormalを反転
+    // 屈折率も逆にする
+    if(!isEntering){
+        normal = {0, -1, 0};
+        n1 = ior;
+        n2 = 1.0;
+    }
 
-//    // フレネル反射率
-//    fresnelReflectance = fresnel(direction, normal, n1, n2);
+    // 全反射
+    if(totalReflect(direction, n1, n2)){
+        auto reflectDir = reflect(direction, {0, 1, 0});
+        auto weight = scatter;
+        return {reflectDir, weight};
+    }
+
+    // フレネル反射率
+    float fresnelReflectance = fresnel(direction, normal, n1, n2);
+
+    // 反射
+    if(frand() < fresnelReflectance){
+        auto reflectDir = reflect(direction, normal);
+        auto weight = scatter;
+        return {reflectDir, weight};
+    }
+    // 屈折
+    else{
+        auto reflectDir = refract(direction, normal, n1, n2);
+        auto weight = scatter;
+        // 放射輝度(ここではweight)に相対輝度の2乗を掛ける
+        weight *= pow(n1/n2, 2.0);
+        return {reflectDir, weight};
+    }
 
 //    // 反射
-//    if(frand() < fresnelReflectance){
-//        res = 1;
-//        return reflect(direction, normal);
+//    if(frand() < fr) {
+//        wi = reflect(wo, normal);
+//        pdf = fr;
+//        return fr/absCosTheta(wi) * Vec3(1);
 //    }
-//    // 屈折
-//    else{
-//        res =2;
-//        return refract(direction, normal, n1, n2);
+//    //屈折
+//    else {
+//        if(refract(wo, wi, normal, n1, n2)) {
+//            pdf = 1 - fr;
+//            return std::pow(n1/n2, 2.0) * (1 - fr)/absCosTheta(wi) * Vec3(1);
+//        }
+//        //全反射
+//        else {
+//            wi = reflect(wo, normal);
+//            pdf = 1 - fr;
+//            return (1 - fr)/absCosTheta(wi) * Vec3(1);
+//        }
 //    }
 
-////    // 反射
-////    if(frand() < fr) {
-////        wi = reflect(wo, normal);
-////        pdf = fr;
-////        return fr/absCosTheta(wi) * Vec3(1);
-////    }
-////    //屈折
-////    else {
-////        if(refract(wo, wi, normal, n1, n2)) {
-////            pdf = 1 - fr;
-////            return std::pow(n1/n2, 2.0) * (1 - fr)/absCosTheta(wi) * Vec3(1);
-////        }
-////        //全反射
-////        else {
-////            wi = reflect(wo, normal);
-////            pdf = 1 - fr;
-////            return (1 - fr)/absCosTheta(wi) * Vec3(1);
-////        }
-////    }
-
-//}
+}
 
 //QVector3D Glass::getWeight(const QVector3D &direction, float &theta) const
 //{

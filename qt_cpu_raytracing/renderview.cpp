@@ -1,7 +1,7 @@
 #include "renderview.h"
 
-const int NUM_SAMPLES = 100;
-constexpr int DEPTH = 16;
+const int NUM_SAMPLES = 2000;
+constexpr int DEPTH = 32;
 
 RenderView::RenderView(QWidget *parent)
     : QGraphicsView(parent)
@@ -18,11 +18,12 @@ RenderView::RenderView(QWidget *parent)
 void RenderView::render()
 {
     // image setting
-    constexpr int width = 640;
-    constexpr int height = 360;
-//    constexpr int width = 360;
-//    constexpr int width = 480;
-//    constexpr int height = 480;
+//    constexpr int width = 640;
+//    constexpr int height = 360;
+
+    constexpr int width = 480;
+    constexpr int height = 480;
+
     auto fImage = createImage(width, height);
 
     const double screenWidth = 15.0 * width / height;
@@ -32,23 +33,24 @@ void RenderView::render()
     // Spheres
     QVector<Sphere> scene;
     scene << Sphere(QVector3D( 10, 0, 0),  4, std::make_shared<Light>());
-    scene << Sphere(QVector3D(-10, 0, 0), 4, std::make_shared<Diffuse>(QVector3D(1, 0.1, 0.1)));
-    scene << Sphere(QVector3D(  0, 0, 0),   4, std::make_shared<Mirror>());
+    scene << Sphere(QVector3D(-10, 0, 0), 4, std::make_shared<Diffuse>(QVector3D(0.9, 0.1, 0.1)));
+    scene << Sphere(QVector3D(  0, 0, 0),   4, std::make_shared<Glass>());
     scene << Sphere(QVector3D(0, -10004, 0), 10000, std::make_shared<Diffuse>());
 
     // cornellBox
     float boxSize = 16;
-    float sphereRad = 2.5;
+    float sphereRad = 3;
     QVector<Sphere> cornellBox;
     cornellBox << Sphere(QVector3D(0, -(10000+boxSize/2), 0), 10000, std::make_shared<Diffuse>()); // floor
     cornellBox << Sphere(QVector3D(0, (10000+boxSize/2), 0), 10000, std::make_shared<Diffuse>());  // ceiling
-    cornellBox << Sphere(QVector3D((10000+boxSize/2), 0, 0), 10000, std::make_shared<Diffuse>(QVector3D(0.4, 1, 0.4)));  // right
-    cornellBox << Sphere(QVector3D(-(10000+boxSize/2), 0, 0), 10000, std::make_shared<Diffuse>(QVector3D(1, 0.4, 0.4))); // left
+    cornellBox << Sphere(QVector3D((10000+boxSize/2), 0, 0), 10000, std::make_shared<Diffuse>(QVector3D(0.4, 0.9, 0.4)));  // right
+    cornellBox << Sphere(QVector3D(-(10000+boxSize/2), 0, 0), 10000, std::make_shared<Diffuse>(QVector3D(0.9, 0.4, 0.4))); // left
     cornellBox << Sphere(QVector3D(0, 0, -(10000+boxSize/2)), 10000, std::make_shared<Diffuse>()); // front
     cornellBox << Sphere(QVector3D(0, 0, 10030), 10000, std::make_shared<Light>(QVector3D(0, 0, 0))); // back
-    cornellBox << Sphere(QVector3D(0, -(boxSize/2)+sphereRad, -3), sphereRad, std::make_shared<Diffuse>());
-    cornellBox << Sphere(QVector3D(4, -(boxSize/2)+sphereRad, 3), sphereRad, std::make_shared<Light>());
-    cornellBox << Sphere(QVector3D(-4, -(boxSize/2)+sphereRad, 1), sphereRad, std::make_shared<Mirror>());
+//    cornellBox << Sphere(QVector3D(0, -(boxSize/2)+sphereRad, -3), sphereRad, std::make_shared<Diffuse>());
+    cornellBox << Sphere(QVector3D(4, -(boxSize/2)+sphereRad, 3), sphereRad, std::make_shared<Diffuse>());
+    cornellBox << Sphere(QVector3D(0, boxSize/2+9, 0), 10, std::make_shared<Light>(QVector3D{4, 4, 4})); // ceiling light
+    cornellBox << Sphere(QVector3D(-4, -(boxSize/2)+sphereRad, 1), sphereRad, std::make_shared<Glass>());
 
     // Mesh
     Mesh mesh = importFbx("E:/3D Objects/bunny.fbx", 13.0f);
@@ -73,8 +75,8 @@ void RenderView::render()
                 // radianceを計算
                 int depth = 0;
 //                fColor += radiance(ray, mesh, depth);
-                fColor += radiance(ray, scene, depth);
-//                fColor += radiance(ray, cornellBox, depth);
+//                fColor += radiance(ray, scene, depth);
+                fColor += radiance(ray, cornellBox, depth);
             }
             fImage[h][w] = (fColor/NUM_SAMPLES);
 
@@ -93,6 +95,7 @@ void RenderView::render()
 QVector3D RenderView::radiance(Ray& ray, Mesh& mesh, int& depth)
 {
     static IBL sky("E:/Pictures/Textures/_HDRI/4k/rural_landscape_4k.hdr");
+//    static IBL sky("E:/Pictures/Textures/_HDRI/PaperMill_E_3k.hdr");
 
     // シーンとの交差判定
     Intersection intersection;
@@ -122,7 +125,8 @@ QVector3D RenderView::radiance(Ray& ray, Mesh& mesh, int& depth)
 
 QVector3D RenderView::radiance(Ray& ray, QVector<Sphere>& scene, int& depth)
 {
-    static IBL sky("E:/Pictures/Textures/_HDRI/4k/rural_landscape_4k.hdr");
+        static IBL sky("E:/Pictures/Textures/_HDRI/4k/rural_landscape_4k.hdr");
+//    static IBL sky("E:/Pictures/Textures/_HDRI/PaperMill_E_3k.hdr");
 
     // シーンとの交差判定
     Intersection intersection;

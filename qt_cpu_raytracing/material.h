@@ -44,20 +44,6 @@ public:
     std::tuple<QVector3D, QVector3D> sample(const QVector3D& direction, int& depth) override;
 };
 
-//class Glass : public Material
-//{
-//public:
-//    Glass();
-//    ~Glass() {}
-
-//    std::tuple<QVector3D, QVector3D> sample(const QVector3D& direction, int& depth) override;
-//    QVector3D getWeight(const QVector3D& direction, float& theta) const override;
-
-//    float ior;
-//    float fresnelReflectance;
-//    int res;
-//};
-
 class Light : public Material
 {
 public:
@@ -66,6 +52,17 @@ public:
     ~Light() {}
 
     std::tuple<QVector3D, QVector3D> sample(const QVector3D& direction, int& depth) override;
+};
+
+class Glass : public Material
+{
+public:
+    Glass();
+    ~Glass() {}
+
+    std::tuple<QVector3D, QVector3D> sample(const QVector3D& direction, int& depth) override;
+
+    float ior;
 };
 
 #endif // MATERIAL_H
