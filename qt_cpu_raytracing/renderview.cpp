@@ -1,6 +1,6 @@
 #include "renderview.h"
 
-const int NUM_SAMPLES = 20;
+const int NUM_SAMPLES = 500;
 constexpr int DEPTH = 32;
 
 RenderView::RenderView(QWidget *parent)
@@ -75,8 +75,8 @@ void RenderView::render()
 
                 // radianceを計算
                 int depth = 0;
-                fColor += radiance(ray, mesh, depth);
-//                fColor += radiance(ray, scene, depth);
+//                fColor += radiance(ray, mesh, depth);
+                fColor += radiance(ray, scene, depth);
 //                fColor += radiance(ray, cornellBox, depth);
             }
             fImage[h][w] = (fColor/NUM_SAMPLES);
@@ -84,6 +84,7 @@ void RenderView::render()
         }
         if(omp_get_thread_num() == 0) {
             qDebug() << int(double(h)/height * 100)  << "%";
+            setImage(fImage);
         }
     }
 
@@ -113,7 +114,7 @@ QVector3D RenderView::radiance(Ray& ray, Mesh& mesh, int& depth)
 
     // ray更新
     ray.direction = localToWorld(nextDirection, s, n, t);
-    ray.origin = intersection.position + ray.direction * 0.001f;
+    ray.origin = intersection.position + ray.direction * 0.002f;
 
     // 再帰でradiance取得
     if(depth > DEPTH) return mesh.material->getEmission();
@@ -147,7 +148,7 @@ QVector3D RenderView::radiance(Ray& ray, QVector<Sphere>& scene, int& depth)
 
     // ray更新
     ray.direction = localToWorld(nextDirection, s, n, t);
-    ray.origin = intersection.position + ray.direction * 0.001f;
+    ray.origin = intersection.position + ray.direction * 0.002f;
 
     // 再帰でradiance取得
     if(depth > DEPTH) return sphere.material->getEmission();
@@ -157,8 +158,6 @@ QVector3D RenderView::radiance(Ray& ray, QVector<Sphere>& scene, int& depth)
     // Lo = Le + (BRDF * Li * cosθ)/pdf = Le + weight*Li
     return sphere.material->getEmission() + weight * inRandiance;
 }
-
-
 
 void RenderView::setImage(const QVector<QVector<QVector3D>>& fImage)
 {
@@ -186,4 +185,23 @@ void RenderView::setImage(const QVector<QVector<QVector3D>>& fImage)
     show();
     image->save("E:/Desktop/dev/render.png");
 }
+
+void RenderView::updateImage(const QVector<QVector<QVector3D>> &fImage)
+{
+    int width = fImage[0].size();
+    int height = fImage.size();
+
+    for (int h=0; h<height; h++) {
+        for (int w=0; w<width; w++) {
+            QVector3D fColor = fImage[h][w];
+
+            QColor color;
+            color.setRgbF(qBound(0.0f, fColor.x(), 1.0f),
+                          qBound(0.0f, fColor.y(), 1.0f),
+                          qBound(0.0f, fColor.z(), 1.0f));
+            image->setPixelColor(w, h, color);
+        }
+    }
+}
+
 
