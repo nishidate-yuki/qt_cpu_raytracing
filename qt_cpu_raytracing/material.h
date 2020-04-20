@@ -5,12 +5,19 @@
 #include <QtMath>
 #include "utils.h"
 
+float absCosTheta(const QVector3D&);
+
 QVector3D reflect(const QVector3D&, const QVector3D&);
+
+float fresnel(const QVector3D&, const QVector3D&, float, float);
 
 class Material
 {
 public:
-    virtual QVector3D sample(const QVector3D& direction, float& pdf, int& depth) const = 0;
+    virtual QVector3D sample(const QVector3D& direction, float& pdf, int& depth) = 0;
+
+    // dir, weight を返す
+    virtual std::tuple<QVector3D, QVector3D> sample(const QVector3D& direction, int& depth) = 0;
     virtual QVector3D getWeight(const QVector3D& direction, float& theta) const = 0;
 
     QVector3D getScatter() {return scatter;}
@@ -28,7 +35,8 @@ public:
     Diffuse(const QVector3D&);
     ~Diffuse() {}
 
-    QVector3D sample(const QVector3D& direction, float& pdf, int& depth) const override;
+    QVector3D sample(const QVector3D& direction, float& pdf, int& depth) override;
+    std::tuple<QVector3D, QVector3D> sample(const QVector3D& direction, int& depth) override;
     QVector3D getWeight(const QVector3D& direction, float& theta) const override;
 };
 
@@ -38,17 +46,34 @@ public:
     Mirror();
     ~Mirror() {}
 
-    QVector3D sample(const QVector3D& direction, float& pdf, int& depth) const override;
+    QVector3D sample(const QVector3D& direction, float& pdf, int& depth) override;
+    std::tuple<QVector3D, QVector3D> sample(const QVector3D& direction, int& depth) override;
     QVector3D getWeight(const QVector3D& direction, float& theta) const override;
 };
+
+//class Glass : public Material
+//{
+//public:
+//    Glass();
+//    ~Glass() {}
+
+//    QVector3D sample(const QVector3D& direction, float& pdf, int& depth) override;
+//    QVector3D getWeight(const QVector3D& direction, float& theta) const override;
+
+//    float ior;
+//    float fresnelReflectance;
+//    int res;
+//};
 
 class Light : public Material
 {
 public:
     Light();
+    Light(const QVector3D&);
     ~Light() {}
 
-    QVector3D sample(const QVector3D& direction, float& pdf, int& depth) const override;
+    QVector3D sample(const QVector3D& direction, float& pdf, int& depth) override;
+    std::tuple<QVector3D, QVector3D> sample(const QVector3D& direction, int& depth) override;
     QVector3D getWeight(const QVector3D& direction, float& theta) const override;
 };
 

@@ -56,3 +56,17 @@ void gammaCorrection(QVector<QVector<QVector3D>> &fImage) {
         }
     }
 }
+
+// 画像初期化
+QVector<QVector<QVector3D>> createImage(const int &width, const int &height)
+{
+    // Setup Image
+    QVector<QVector<QVector3D>> fImage(height);
+    for (int h=0; h<height; h++) {
+        for (int w=0; w<width; w++) {
+            QVector3D color(float(h)/height, float(w)/width, 0);
+            fImage[h].append(color);
+        }
+    }
+    return fImage;
+}

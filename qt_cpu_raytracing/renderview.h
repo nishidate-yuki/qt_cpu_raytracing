@@ -9,6 +9,7 @@
 #include <QRandomGenerator>
 #include <QtMath>
 #include <QElapsedTimer>
+#include <omp.h>
 #include "ray.h"
 #include "utils.h"
 #include "sky.h"

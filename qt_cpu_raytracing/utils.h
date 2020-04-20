@@ -23,5 +23,6 @@ QVector3D localToWorld(const QVector3D&, const QVector3D&, const QVector3D&, con
 
 void gammaCorrection(QVector<QVector<QVector3D>> &);
 
+QVector<QVector<QVector3D>> createImage(const int&, const int&);
 
 #endif // UTILS_H
