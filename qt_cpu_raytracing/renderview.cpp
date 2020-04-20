@@ -104,22 +104,10 @@ QVector3D RenderView::radiance(Ray& ray, Mesh& mesh, int& depth)
     // world座標 -> local座標
     QVector3D localDirection = worldToLocal(-ray.direction, s, n, t);
 
-    // ------------------------------------------------------------------
-    // 次のrayのサンプル取得
-//    float pdf;
-//    localDirection = mesh.material->sample(localDirection, pdf, depth);
-
-    // (BRDF * cosθ / pdf) の取得
-//    QVector3D weight = mesh.material->getWeight(localDirection, pdf);
-    // ------------------------------------------------------------------
-
-    // ------------------------------------------------------------------
     auto [nextDirection, weight] = mesh.material->sample(localDirection, depth);
-    // ------------------------------------------------------------------
 
     // ray更新
     ray.origin = intersection.position /*+ intersection.normal * 0.001f*/;
-//    ray.direction = localToWorld(localDirection, s, n, t);
     ray.direction = localToWorld(nextDirection, s, n, t);
 
     // 再帰でradiance取得
