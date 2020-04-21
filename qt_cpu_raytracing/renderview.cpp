@@ -1,6 +1,6 @@
 #include "renderview.h"
 
-const int NUM_SAMPLES = 500;
+const int NUM_SAMPLES = 50;
 constexpr int DEPTH = 32;
 
 RenderView::RenderView(QWidget *parent)
@@ -9,22 +9,19 @@ RenderView::RenderView(QWidget *parent)
     graphicsScene = new QGraphicsScene();
     setScene(graphicsScene);
 
-    QElapsedTimer timer;
-    timer.start();
-    render();
-    qDebug() << timer.elapsed()/1000 << "s";
+    constexpr int width = 640;
+    constexpr int height = 360;
+//    constexpr int width = 480;
+//    constexpr int height = 480;
+    fImage = createImage(width, height);
+    setImage();
 }
 
 void RenderView::render()
 {
     // image setting
-    constexpr int width = 640;
-    constexpr int height = 360;
-
-//    constexpr int width = 480;
-//    constexpr int height = 480;
-
-    auto fImage = createImage(width, height);
+    int width = fImage[0].size();
+    int height = fImage.size();
 
     const double screenWidth = 15.0 * width / height;
     const double screenHeight= 15.0;
@@ -80,40 +77,37 @@ void RenderView::render()
 //                fColor += radiance(ray, cornellBox, depth);
             }
             fImage[h][w] = (fColor/NUM_SAMPLES);
-
         }
         if(omp_get_thread_num() == 0) {
             qDebug() << int(double(h)/height * 100)  << "%";
-            setImage(fImage);
         }
     }
 
     gammaCorrection(fImage);
 
-    setImage(fImage);
+    setImage();
 }
 
 
 QVector3D RenderView::radiance(Ray& ray, Mesh& mesh, int& depth)
 {
     static IBL sky("E:/Pictures/Textures/_HDRI/4k/rural_landscape_4k.hdr");
-//    static IBL sky("E:/Pictures/Textures/_HDRI/PaperMill_E_3k.hdr");
 
     // シーンとの交差判定
     Intersection intersection;
     if(!mesh.intersect(ray, intersection)) return sky.getRadiance(ray);
 
-    // ローカル座標系 (s, n, t) を作る
-    auto [n, s, t] = orthonormalize(intersection.normal);
+    // ローカル座標系 (u, n, t) を作る
+    auto [v, u, w] = orthonormalize(intersection.normal);
 
     // world座標 -> local座標
-    QVector3D localDirection = worldToLocal(-ray.direction, s, n, t);
+    QVector3D localDirection = worldToLocal(-ray.direction, u, v, w);
 
     // rayの方向とweightを計算する
     auto [nextDirection, weight] = mesh.material->sample(localDirection, depth);
 
     // ray更新
-    ray.direction = localToWorld(nextDirection, s, n, t);
+    ray.direction = localToWorld(nextDirection, u, v, w);
     ray.origin = intersection.position + ray.direction * 0.002f;
 
     // 再帰でradiance取得
@@ -127,8 +121,7 @@ QVector3D RenderView::radiance(Ray& ray, Mesh& mesh, int& depth)
 
 QVector3D RenderView::radiance(Ray& ray, QVector<Sphere>& scene, int& depth)
 {
-        static IBL sky("E:/Pictures/Textures/_HDRI/4k/rural_landscape_4k.hdr");
-//    static IBL sky("E:/Pictures/Textures/_HDRI/PaperMill_E_3k.hdr");
+    static IBL sky("E:/Pictures/Textures/_HDRI/4k/rural_landscape_4k.hdr");
 
     // シーンとの交差判定
     Intersection intersection;
@@ -159,7 +152,7 @@ QVector3D RenderView::radiance(Ray& ray, QVector<Sphere>& scene, int& depth)
     return sphere.material->getEmission() + weight * inRandiance;
 }
 
-void RenderView::setImage(const QVector<QVector<QVector3D>>& fImage)
+void RenderView::setImage()
 {
     int width = fImage[0].size();
     int height = fImage.size();
@@ -186,7 +179,7 @@ void RenderView::setImage(const QVector<QVector<QVector3D>>& fImage)
     image->save("E:/Desktop/dev/render.png");
 }
 
-void RenderView::updateImage(const QVector<QVector<QVector3D>> &fImage)
+void RenderView::updateImage()
 {
     int width = fImage[0].size();
     int height = fImage.size();

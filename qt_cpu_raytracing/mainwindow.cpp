@@ -13,3 +13,11 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+void MainWindow::on_pushButton_clicked()
+{
+    QElapsedTimer timer;
+    timer.start();
+    ui->graphicsView->render();
+    qDebug() << timer.elapsed()/1000 << "s";
+}

@@ -30,6 +30,7 @@ public:
     QVector<int> getIndices(){return indices;}
     QVector<Triangle> getTriangles(){return triangles;}
     void createTriangles();
+
     bool intersect(const Ray &ray, Intersection &intersection);
 
     std::shared_ptr<Material> material;
