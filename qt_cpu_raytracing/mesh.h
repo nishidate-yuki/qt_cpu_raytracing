@@ -34,10 +34,6 @@ public:
 
     bool intersect(const Ray &ray, Intersection &intersection) override;
 
-//    std::shared_ptr<Material> material;
-
-    void setMaterial(const std::shared_ptr<Material>&);
-
 private:
     QVector<QVector3D> positions;
     QVector<Vertex> vertices;

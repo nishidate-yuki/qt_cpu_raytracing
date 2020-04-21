@@ -6,7 +6,7 @@ Mesh::Mesh()
 
 Mesh::Mesh(const std::shared_ptr<Material> &material)
 {
-
+    this->material = material;
 }
 
 Mesh::~Mesh()
@@ -32,8 +32,6 @@ void Mesh::setIndices(const QVector<int>& indices)
 void Mesh::createTriangles()
 {
     qDebug() << "indices size" << indices.size();
-//    Triangle triangle(positions[0], positions[1], positions[2]);
-//    triangles.append(triangle);
     for (int i=0; i<indices.size(); i += 3) {
         Triangle triangle(positions[indices[i]], positions[indices[i+1]], positions[indices[i+2]]);
         triangles.append(triangle);
@@ -49,20 +47,11 @@ bool Mesh::intersect(const Ray &ray, Intersection &intersection)
             if(hitpoint.distance < intersection.distance){
                 intersection = hitpoint;
                 hit = true;
-//                intersection.objectIndex = i;
             }
         }
     }
-
-//    return intersection.objectIndex != -1;
     return hit;
 }
-
-void Mesh::setMaterial(const std::shared_ptr<Material> &material)
-{
-    this->material = material;
-}
-
 
 Mesh importFbx(const char* filename, const float scale, const QVector3D& offset)
 {

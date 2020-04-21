@@ -45,17 +45,3 @@ bool Sphere::intersect(const Ray &ray, Intersection& intersection){
 
     return false;
 }
-
-bool intersectScene(const Ray &ray, QVector<Sphere>& scene, Intersection& intersection)
-{
-    for (int i=0; i<scene.size(); i++) {
-        Intersection hitpoint;
-        if(scene[i].intersect(ray, hitpoint)){
-            if(hitpoint.distance < intersection.distance){
-                intersection = hitpoint;
-                intersection.objectIndex = i;
-            }
-        }
-    }
-    return intersection.objectIndex != -1;
-}

@@ -6,6 +6,11 @@ Object::Object()
 
 }
 
+void Object::setMaterial(const std::shared_ptr<Material> &material)
+{
+    this->material = material;
+}
+
 bool intersectScene(const Ray &ray, QVector<std::shared_ptr<Object>> &scene, Intersection &intersection)
 {
     for (int i=0; i<scene.size(); i++) {

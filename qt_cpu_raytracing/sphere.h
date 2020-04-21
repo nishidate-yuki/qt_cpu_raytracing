@@ -22,11 +22,6 @@ public:
 
     QVector3D center;
     float radius;
-//    std::shared_ptr<Material> material;
-
-    void setMaterial(const std::shared_ptr<Material>&);
 };
-
-bool intersectScene(const Ray&, QVector<Sphere>&, Intersection&);
 
 #endif // SPHERE_H

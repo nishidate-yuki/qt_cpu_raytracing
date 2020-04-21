@@ -3,8 +3,6 @@
 
 #include "ray.h"
 
-
-
 class Object
 {
 public:
@@ -13,6 +11,8 @@ public:
     std::shared_ptr<Material> material;
 
     virtual bool intersect(const Ray&, Intersection&) = 0;
+
+    void setMaterial(const std::shared_ptr<Material>&);
 };
 
 
