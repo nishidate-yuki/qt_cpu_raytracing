@@ -10,19 +10,21 @@
 #include <typeinfo>
 #include "material.h"
 #include "ray.h"
+#include "object.h"
 
-
-class Sphere
+class Sphere : public Object
 {
 public:
     Sphere(const QVector3D&, const float&);
     Sphere(const QVector3D&, const float&, const std::shared_ptr<Material>&);
 
-    bool intersect(const Ray&, Intersection&);
+    bool intersect(const Ray&, Intersection&) override;
 
     QVector3D center;
     float radius;
-    std::shared_ptr<Material> material;
+//    std::shared_ptr<Material> material;
+
+    void setMaterial(const std::shared_ptr<Material>&);
 };
 
 bool intersectScene(const Ray&, QVector<Sphere>&, Intersection&);

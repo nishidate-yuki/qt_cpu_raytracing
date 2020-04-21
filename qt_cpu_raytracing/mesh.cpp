@@ -2,11 +2,9 @@
 
 Mesh::Mesh()
 {
-
 }
 
 Mesh::Mesh(const std::shared_ptr<Material> &material)
-    : material(material)
 {
 
 }
@@ -44,17 +42,20 @@ void Mesh::createTriangles()
 
 bool Mesh::intersect(const Ray &ray, Intersection &intersection)
 {
+    bool hit = false;
     for (int i=0; i<triangles.size(); i++) {
         Intersection hitpoint;
         if(triangles[i].intersect(ray, hitpoint)){
             if(hitpoint.distance < intersection.distance){
                 intersection = hitpoint;
-                intersection.objectIndex = i;
+                hit = true;
+//                intersection.objectIndex = i;
             }
         }
     }
 
-    return intersection.objectIndex != -1;
+//    return intersection.objectIndex != -1;
+    return hit;
 }
 
 void Mesh::setMaterial(const std::shared_ptr<Material> &material)

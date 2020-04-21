@@ -16,6 +16,7 @@
 #include "sphere.h"
 #include "triangle.h"
 #include "mesh.h"
+#include "object.h"
 
 class RenderView : public QGraphicsView
 {
@@ -27,6 +28,7 @@ public:
     void render();
     QVector3D radiance(Ray& ray, Mesh& mesh, int& depth);
     QVector3D radiance(Ray&, QVector<Sphere>&, int&);
+    QVector3D radiance(Ray&, QVector<std::shared_ptr<Object>>&, int&);
     void setImage();
     void updateImage();
 

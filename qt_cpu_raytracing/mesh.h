@@ -8,6 +8,7 @@
 #include <iostream>
 #include "fbxsdk.h"
 #include "triangle.h"
+#include "object.h"
 
 struct Vertex{
     QVector3D position;
@@ -16,7 +17,7 @@ struct Vertex{
 //    QVector2D texcoord;
 };
 
-class Mesh
+class Mesh  : public Object
 {
 public:
     Mesh();
@@ -31,9 +32,9 @@ public:
     QVector<Triangle> getTriangles(){return triangles;}
     void createTriangles();
 
-    bool intersect(const Ray &ray, Intersection &intersection);
+    bool intersect(const Ray &ray, Intersection &intersection) override;
 
-    std::shared_ptr<Material> material;
+//    std::shared_ptr<Material> material;
 
     void setMaterial(const std::shared_ptr<Material>&);
 

@@ -2,16 +2,15 @@
 
 Sphere::Sphere(const QVector3D &center, const float &radius)
     : center(center),
-      radius(radius),
-      material(new Diffuse)
+      radius(radius)
 {
 }
 
 Sphere::Sphere(const QVector3D &center, const float &radius, const std::shared_ptr<Material>& material)
     : center(center),
-      radius(radius),
-      material(material)
+      radius(radius)
 {
+    this->material = material;
 }
 
 bool Sphere::intersect(const Ray &ray, Intersection& intersection){

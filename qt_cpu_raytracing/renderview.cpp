@@ -1,6 +1,6 @@
 #include "renderview.h"
 
-const int NUM_SAMPLES = 50;
+const int NUM_SAMPLES = 500;
 constexpr int DEPTH = 32;
 
 RenderView::RenderView(QWidget *parent)
@@ -55,6 +55,13 @@ void RenderView::render()
 //    mesh.setMaterial(std::make_shared<Diffuse>(lightBlue));
     mesh.setMaterial(std::make_shared<Glass>());
 
+    // Objects
+    QVector<std::shared_ptr<Object>> objects;
+    objects << std::make_shared<Sphere>(QVector3D(-10, 0, 0), 3, std::make_shared<Mirror>());
+    objects << std::make_shared<Sphere>(QVector3D(10, 0, 0), 3, std::make_shared<Light>());
+    objects << std::make_shared<Mesh>(importFbx("E:/3D Objects/bunny.fbx", 10.0f));
+//    objects << std::make_shared<Sphere>(QVector3D(0, -10003, 0), 10000, std::make_shared<Diffuse>()); // floor
+
     #pragma omp parallel for schedule(dynamic, 1)
     for (int h=0; h<height; h++) {
         for (int w=0; w<width; w++) {
@@ -73,7 +80,7 @@ void RenderView::render()
                 // radianceを計算
                 int depth = 0;
 //                fColor += radiance(ray, mesh, depth);
-                fColor += radiance(ray, scene, depth);
+                fColor += radiance(ray, objects, depth);
 //                fColor += radiance(ray, cornellBox, depth);
             }
             fImage[h][w] = (fColor/NUM_SAMPLES);
@@ -149,7 +156,41 @@ QVector3D RenderView::radiance(Ray& ray, QVector<Sphere>& scene, int& depth)
 
     // 最終的なレンダリング方程式
     // Lo = Le + (BRDF * Li * cosθ)/pdf = Le + weight*Li
-    return sphere.material->getEmission() + weight * inRandiance;
+            return sphere.material->getEmission() + weight * inRandiance;
+    }
+
+QVector3D RenderView::radiance(Ray &ray, QVector<std::shared_ptr<Object>> &scene, int &depth)
+{
+    static IBL sky("E:/Pictures/Textures/_HDRI/4k/rural_landscape_4k.hdr");
+
+    // シーンとの交差判定
+    Intersection intersection;
+    if(!intersectScene(ray, scene, intersection)) return sky.getRadiance(ray);
+
+    // Hitした情報を取得
+    std::shared_ptr<Object> obj = scene[intersection.objectIndex];
+
+    // ローカル座標系 (s, n, t) を作る
+    auto [n, s, t] = orthonormalize(intersection.normal);
+
+    // world座標 -> local座標
+    QVector3D localDirection = worldToLocal(-ray.direction, s, n, t);
+
+    // rayの方向とweightを計算する
+    auto [nextDirection, weight] = obj->material->sample(localDirection, depth);
+
+    // ray更新
+    ray.direction = localToWorld(nextDirection, s, n, t);
+    ray.origin = intersection.position + ray.direction * 0.002f;
+
+    // 再帰でradiance取得
+    if(depth > DEPTH) return obj->material->getEmission();
+    QVector3D inRandiance = radiance(ray, scene, depth);
+
+    // 最終的なレンダリング方程式
+    // Lo = Le + (BRDF * Li * cosθ)/pdf = Le + weight*Li
+    return obj->material->getEmission() + weight * inRandiance;
+
 }
 
 void RenderView::setImage()

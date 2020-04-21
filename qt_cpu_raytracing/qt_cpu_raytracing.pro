@@ -29,6 +29,7 @@ SOURCES += \
         mainwindow.cpp \
         material.cpp \
         mesh.cpp \
+        object.cpp \
         ray.cpp \
         renderview.cpp \
         sky.cpp \
@@ -40,6 +41,7 @@ HEADERS += \
         mainwindow.h \
         material.h \
         mesh.h \
+        object.h \
         ray.h \
         renderview.h \
         sky.h \
