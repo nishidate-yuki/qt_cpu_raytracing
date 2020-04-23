@@ -45,13 +45,13 @@ QVector3D refract(const QVector3D& v, const QVector3D& n, float n1, float n2) {
 // Diffuse
 Diffuse::Diffuse()
 {
-    scatter = QVector3D(0.9, 0.9, 0.9);
+    color = QVector3D(0.9, 0.9, 0.9);
     emission = QVector3D(0, 0, 0);
 }
 
 Diffuse::Diffuse(const QVector3D& color)
 {
-    scatter = color;
+    this->color = color;
 }
 
 std::tuple<QVector3D, QVector3D> Diffuse::sample(const QVector3D &direction, int &depth)
@@ -64,26 +64,26 @@ std::tuple<QVector3D, QVector3D> Diffuse::sample(const QVector3D &direction, int
     float x = d * cos(phi);
     float z = d * sin(phi);
 
-    return {{x, y, z}, scatter};
+    return {{x, y, z}, color};
 }
 
 // Mirror
 Mirror::Mirror()
 {
-    scatter = QVector3D(1, 1, 1);
+    color = QVector3D(1, 1, 1);
     emission = QVector3D(0, 0, 0);
 }
 
 std::tuple<QVector3D, QVector3D> Mirror::sample(const QVector3D &direction, int &depth)
 {
     depth++;
-    return {reflect(direction, QVector3D(0, 1, 0)), scatter};
+    return {reflect(direction, QVector3D(0, 1, 0)), color};
 }
 
 // Light
 Light::Light()
 {
-    scatter = QVector3D(0, 0, 0);
+    color = QVector3D(0, 0, 0);
     emission = QVector3D(1, 1, 1);
 }
 
@@ -102,7 +102,7 @@ std::tuple<QVector3D, QVector3D> Light::sample(const QVector3D &direction, int &
 Glass::Glass()
     : ior(1.5)
 {
-    scatter = {1, 1, 1};
+    color = {1, 1, 1};
     emission = {0, 0, 0};
 }
 
@@ -128,7 +128,7 @@ std::tuple<QVector3D, QVector3D> Glass::sample(const QVector3D& direction, int& 
     // 全反射
     if(totalReflect(direction, n1, n2)){
         auto reflectDir = reflect(direction, {0, 1, 0});
-        auto weight = scatter;
+        auto weight = color;
         return {reflectDir, weight};
     }
 
@@ -138,13 +138,13 @@ std::tuple<QVector3D, QVector3D> Glass::sample(const QVector3D& direction, int& 
     // 反射
     if(frand() < fresnelReflectance){
         auto reflectDir = reflect(direction, normal);
-        auto weight = scatter;
+        auto weight = color;
         return {reflectDir, weight};
     }
     // 屈折
     else{
         auto reflectDir = refract(direction, normal, n1, n2);
-        auto weight = scatter;
+        auto weight = color;
         // 放射輝度(ここではweight)に相対輝度の2乗を掛ける
         weight *= pow(n1/n2, 2.0);
         return {reflectDir, weight};

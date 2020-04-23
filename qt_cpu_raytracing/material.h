@@ -17,11 +17,11 @@ public:
     // dir, weight を返す
     virtual std::tuple<QVector3D, QVector3D> sample(const QVector3D& direction, int& depth) = 0;
 
-    QVector3D getScatter() {return scatter;}
+    QVector3D getColor() {return color;}
     QVector3D getEmission() {return emission;}
 
 protected:
-    QVector3D scatter;
+    QVector3D color;
     QVector3D emission;
 };
 

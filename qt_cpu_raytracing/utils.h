@@ -4,6 +4,9 @@
 #include <QVector3D>
 #include <QVector>
 #include <tuple>
+#include <QColor>
+#include <QEventLoop>
+#include <QTimer>
 
 float frand();
 
@@ -22,7 +25,12 @@ QVector3D worldToLocal(const QVector3D&, const QVector3D&, const QVector3D&, con
 QVector3D localToWorld(const QVector3D&, const QVector3D&, const QVector3D&, const QVector3D&);
 
 void gammaCorrection(QVector<QVector<QVector3D>> &);
+QVector3D gammaCorrection(QVector3D &);
+
+QColor colorFromVector(QVector3D &);
 
 QVector<QVector<QVector3D>> createImage(const int&, const int&);
+
+//void sleep(int);
 
 #endif // UTILS_H

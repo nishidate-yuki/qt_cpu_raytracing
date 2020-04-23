@@ -19,14 +19,6 @@ RenderView::RenderView(QWidget *parent)
 
 void RenderView::render()
 {
-//    QPixmap dieImage("E:/Desktop/dev/neko.png");
-//    QPixmap dieImage;
-//    QImage* image2 = new QImage();
-//    image2->load("E:/Desktop/dev/neko.png");
-
-//    pixmapItem->setPixmap(QPixmap::fromImage(*image2));
-
-
     // image setting
     int width = fImage[0].size();
     int height = fImage.size();
@@ -62,7 +54,7 @@ void RenderView::render()
     objects << std::make_shared<Sphere>(QVector3D(10, 0, 0), 3, std::make_shared<Light>());
     objects << std::make_shared<Mesh>(importFbx("E:/3D Objects/bunny.fbx", 10.0f));
 
-//    #pragma omp parallel for schedule(dynamic, 1)
+    #pragma omp parallel for schedule(dynamic, 1)
     for (int h=0; h<height; h++) {
         for (int w=0; w<width; w++) {
             QVector3D fColor(0, 0, 0);
@@ -79,31 +71,24 @@ void RenderView::render()
 
                 // radianceを計算
                 int depth = 0;
-                fColor += radiance(ray, scene, depth);
-//                fColor += radiance(ray, objects, depth);
+//                fColor += radiance(ray, scene, depth);
+                fColor += radiance(ray, objects, depth);
 //                fColor += radiance(ray, cornellBox, depth);
             }
-            fImage[h][w] = (fColor/NUM_SAMPLES);
+            fColor = fColor/NUM_SAMPLES;
+            fColor = gammaCorrection(fColor);
 
-            // TODO: gamma correct
-            QColor color;
-            color.setRgbF(qBound(0.0f, fImage[h][w].x(), 1.0f),
-                          qBound(0.0f, fImage[h][w].y(), 1.0f),
-                          qBound(0.0f, fImage[h][w].z(), 1.0f));
-            image->setPixelColor(w, h, color);
+            image->setPixelColor(w, h, colorFromVector(fColor));
         }
         if(omp_get_thread_num() == 0) {
             qDebug() << int(double(h)/height * 100)  << "%";
         }
-        pixmapItem->setPixmap(QPixmap::fromImage(*image));
-        QApplication::processEvents();
     }
 
-    gammaCorrection(fImage);
+    pixmapItem->setPixmap(QPixmap::fromImage(*image));
 
-//    pixmapItem->setPixmap(QPixmap::fromImage(*image));
-    updateImage();
-    QApplication::processEvents();
+    image->save("E:/Desktop/dev/render.png");
+
 }
 
 QVector3D RenderView::radiance(Ray &ray, QVector<std::shared_ptr<Object>> &scene, int &depth)
@@ -113,8 +98,6 @@ QVector3D RenderView::radiance(Ray &ray, QVector<std::shared_ptr<Object>> &scene
     // シーンとの交差判定
     Intersection intersection;
     if(!intersectScene(ray, scene, intersection)) return sky.getRadiance(ray);
-
-    // Hitした情報を取得
     std::shared_ptr<Object> obj = scene[intersection.objectIndex];
 
     // ローカル座標系 (s, n, t) を作る
@@ -138,7 +121,6 @@ QVector3D RenderView::radiance(Ray &ray, QVector<std::shared_ptr<Object>> &scene
     // 最終的なレンダリング方程式
     // Lo = Le + (BRDF * Li * cosθ)/pdf
     return obj->material->getEmission() + weight * inRandiance;
-
 }
 
 void RenderView::setImage()
@@ -153,11 +135,7 @@ void RenderView::setImage()
     for (int h=0; h<height; h++) {
         for (int w=0; w<width; w++) {
             QVector3D fColor = fImage[h][w];
-
-            QColor color;
-            color.setRgbF(qBound(0.0f, fColor.x(), 1.0f),
-                          qBound(0.0f, fColor.y(), 1.0f),
-                          qBound(0.0f, fColor.z(), 1.0f));
+            QColor color = colorFromVector(fColor);
             image->setPixelColor(w, h, color);
         }
     }
@@ -165,7 +143,7 @@ void RenderView::setImage()
 
     setMinimumSize(qMin(width+2, 1280), qMin(height+2, 720));
     setMaximumSize(qMin(width+2, 1280), qMin(height+2, 720));
-    image->save("E:/Desktop/dev/render.png");
+//    image->save("E:/Desktop/dev/render.png");
 }
 
 void RenderView::updateImage()
