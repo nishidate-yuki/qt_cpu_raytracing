@@ -109,13 +109,10 @@ QVector3D RenderView::radiance(Ray &ray, QVector<std::shared_ptr<Object>> &scene
     if(!intersectScene(ray, scene, intersection)) return sky.getRadiance(ray);
     std::shared_ptr<Object> obj = scene[intersection.objectIndex];
 
-    // ローカル座標系 (s, n, t) を作る
-//    auto [n, s, t] = orthonormalize(intersection.normal);
-
+    // ローカル座標系を作る
     CoordinateConverter converter(intersection.normal);
 
     // world座標 -> local座標
-//    QVector3D localDirection = worldToLocal(-ray.direction, s, n, t);
     QVector3D localDirection = converter.convertToLocal(-ray.direction);
 
     // rayの方向とweightを計算する
@@ -123,7 +120,6 @@ QVector3D RenderView::radiance(Ray &ray, QVector<std::shared_ptr<Object>> &scene
     auto [nextDirection, weight] = obj->material->sample(localDirection, depth);
 
     // ray更新
-//    ray.direction = localToWorld(nextDirection, s, n, t);
     ray.direction = converter.convertToWorld(nextDirection);
     ray.origin = intersection.position + ray.direction * 0.002f;
 
