@@ -17,6 +17,7 @@
 #include "triangle.h"
 #include "mesh.h"
 #include "object.h"
+#include "coordinateconverter.h"
 
 class RenderView : public QGraphicsView
 {

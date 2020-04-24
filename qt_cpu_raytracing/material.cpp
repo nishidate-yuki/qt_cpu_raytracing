@@ -45,8 +45,8 @@ QVector3D refract(const QVector3D& v, const QVector3D& n, float n1, float n2) {
 // Diffuse
 Diffuse::Diffuse()
 {
-    color = QVector3D(0.9, 0.9, 0.9);
-    emission = QVector3D(0, 0, 0);
+    color = {0.9, 0.9, 0.9};
+    emission = {0, 0, 0};
 }
 
 Diffuse::Diffuse(const QVector3D& color)
@@ -70,26 +70,31 @@ std::tuple<QVector3D, QVector3D> Diffuse::sample(const QVector3D &direction, int
 // Mirror
 Mirror::Mirror()
 {
-    color = QVector3D(1, 1, 1);
-    emission = QVector3D(0, 0, 0);
+    color = {1, 1, 1};
+    emission = {0, 0, 0};
 }
 
 std::tuple<QVector3D, QVector3D> Mirror::sample(const QVector3D &direction, int &depth)
 {
     depth++;
-    return {reflect(direction, QVector3D(0, 1, 0)), color};
+    return {reflect(direction, {0, 1, 0}), color};
 }
 
 // Light
 Light::Light()
 {
-    color = QVector3D(0, 0, 0);
-    emission = QVector3D(1, 1, 1);
+    color = {0, 0, 0};
+    emission = {1, 1, 1};
 }
 
 Light::Light(const QVector3D &color)
 {
     emission = color;
+}
+
+Light::Light(const float intensity)
+{
+    emission = {intensity, intensity, intensity};
 }
 
 std::tuple<QVector3D, QVector3D> Light::sample(const QVector3D &direction, int &depth)

@@ -1,6 +1,6 @@
 #include "renderview.h"
-#include <QApplication>
-const int NUM_SAMPLES = 50;
+
+const int NUM_SAMPLES = 64;
 constexpr int DEPTH = 32;
 
 RenderView::RenderView(QWidget *parent)
@@ -27,31 +27,40 @@ void RenderView::render()
     const double screenHeight= 15.0;
     QVector3D cameraPosition(0, 0, 25);
 
-    // Spheres
-    QVector<std::shared_ptr<Object>> scene;
-    scene << std::make_shared<Sphere>(QVector3D( 10, 0, 0),  4, std::make_shared<Light>());
-    scene << std::make_shared<Sphere>(QVector3D(-10, 0, 0), 4, std::make_shared<Diffuse>(QVector3D(0.9, 0.1, 0.1)));
-    scene << std::make_shared<Sphere>(QVector3D(  0, 0, 0),   4, std::make_shared<Glass>());
-    scene << std::make_shared<Sphere>(QVector3D(0, -10004, 0), 10000, std::make_shared<Diffuse>());
+    // materials
+    auto diffuse = std::make_shared<Diffuse>();
+    auto redDiffuse = std::make_shared<Diffuse>(QVector3D(0.9, 0.4, 0.4));
+    auto greenDiffuse = std::make_shared<Diffuse>(QVector3D(0.4, 0.9, 0.4));
+    auto mirror = std::make_shared<Mirror>();
+    auto glass = std::make_shared<Glass>();
+    auto light = std::make_shared<Light>(4);
+    auto black = std::make_shared<Light>(0);
 
-    // cornellBox
+    // spheres
+    QVector<std::shared_ptr<Object>> scene;
+    scene << std::make_shared<Sphere>(QVector3D( 10, 0, 0),  4, light);
+    scene << std::make_shared<Sphere>(QVector3D(-10, 0, 0), 4, redDiffuse);
+    scene << std::make_shared<Sphere>(QVector3D(  0, 0, 0),   4, glass);
+    scene << std::make_shared<Sphere>(QVector3D(0, -10004, 0), 10000, diffuse);
+
+    // cornell box
     float boxSize = 16;
     float sphereRad = 3;
     QVector<std::shared_ptr<Object>> cornellBox;
-    cornellBox << std::make_shared<Sphere>(QVector3D(0, -(10000+boxSize/2), 0), 10000, std::make_shared<Diffuse>()); // floor
-    cornellBox << std::make_shared<Sphere>(QVector3D(0, (10000+boxSize/2), 0), 10000, std::make_shared<Diffuse>());  // ceiling
-    cornellBox << std::make_shared<Sphere>(QVector3D((10000+boxSize/2), 0, 0), 10000, std::make_shared<Diffuse>(QVector3D(0.4, 0.9, 0.4)));  // right
-    cornellBox << std::make_shared<Sphere>(QVector3D(-(10000+boxSize/2), 0, 0), 10000, std::make_shared<Diffuse>(QVector3D(0.9, 0.4, 0.4))); // left
-    cornellBox << std::make_shared<Sphere>(QVector3D(0, 0, -(10000+boxSize/2)), 10000, std::make_shared<Diffuse>()); // front
-    cornellBox << std::make_shared<Sphere>(QVector3D(0, 0, 10030), 10000, std::make_shared<Light>(QVector3D(0, 0, 0))); // back
-    cornellBox << std::make_shared<Sphere>(QVector3D(4, -(boxSize/2)+sphereRad, 3), sphereRad, std::make_shared<Diffuse>());
-    cornellBox << std::make_shared<Sphere>(QVector3D(0, boxSize/2+9, 0), 10, std::make_shared<Light>(QVector3D{4, 4, 4})); // ceiling light
-    cornellBox << std::make_shared<Sphere>(QVector3D(-4, -(boxSize/2)+sphereRad, 1), sphereRad, std::make_shared<Glass>());
+    cornellBox << std::make_shared<Sphere>(QVector3D(0, -(10000+boxSize/2), 0), 10000, diffuse); // floor
+    cornellBox << std::make_shared<Sphere>(QVector3D(0, (10000+boxSize/2), 0), 10000, diffuse);  // ceiling
+    cornellBox << std::make_shared<Sphere>(QVector3D((10000+boxSize/2), 0, 0), 10000, greenDiffuse);  // right
+    cornellBox << std::make_shared<Sphere>(QVector3D(-(10000+boxSize/2), 0, 0), 10000, redDiffuse); // left
+    cornellBox << std::make_shared<Sphere>(QVector3D(0, 0, -(10000+boxSize/2)), 10000, diffuse); // front
+    cornellBox << std::make_shared<Sphere>(QVector3D(0, 0, 10030), 10000, black); // back
+    cornellBox << std::make_shared<Sphere>(QVector3D(4, -(boxSize/2)+sphereRad, 3), sphereRad, diffuse);
+    cornellBox << std::make_shared<Sphere>(QVector3D(0, boxSize/2+9, 0), 10, light); // ceiling light
+    cornellBox << std::make_shared<Sphere>(QVector3D(-4, -(boxSize/2)+sphereRad, 1), sphereRad, glass);
 
     // Objects
     QVector<std::shared_ptr<Object>> objects;
-    objects << std::make_shared<Sphere>(QVector3D(-10, 0, 0), 3, std::make_shared<Mirror>());
-    objects << std::make_shared<Sphere>(QVector3D(10, 0, 0), 3, std::make_shared<Light>());
+    objects << std::make_shared<Sphere>(QVector3D(-10, 0, 0), 3, mirror);
+    objects << std::make_shared<Sphere>(QVector3D(10, 0, 0), 3, light);
     objects << std::make_shared<Mesh>(importFbx("E:/3D Objects/bunny.fbx", 10.0f));
 
     #pragma omp parallel for schedule(dynamic, 1)
@@ -72,8 +81,8 @@ void RenderView::render()
                 // radianceを計算
                 int depth = 0;
 //                fColor += radiance(ray, scene, depth);
-                fColor += radiance(ray, objects, depth);
-//                fColor += radiance(ray, cornellBox, depth);
+//                fColor += radiance(ray, objects, depth);
+                fColor += radiance(ray, cornellBox, depth);
             }
             fColor = fColor/NUM_SAMPLES;
             fColor = gammaCorrection(fColor);
@@ -101,17 +110,21 @@ QVector3D RenderView::radiance(Ray &ray, QVector<std::shared_ptr<Object>> &scene
     std::shared_ptr<Object> obj = scene[intersection.objectIndex];
 
     // ローカル座標系 (s, n, t) を作る
-    auto [n, s, t] = orthonormalize(intersection.normal);
+//    auto [n, s, t] = orthonormalize(intersection.normal);
+
+    CoordinateConverter converter(intersection.normal);
 
     // world座標 -> local座標
-    QVector3D localDirection = worldToLocal(-ray.direction, s, n, t);
+//    QVector3D localDirection = worldToLocal(-ray.direction, s, n, t);
+    QVector3D localDirection = converter.convertToLocal(-ray.direction);
 
     // rayの方向とweightを計算する
     // weight = BRDF * cosθ / pdf
     auto [nextDirection, weight] = obj->material->sample(localDirection, depth);
 
     // ray更新
-    ray.direction = localToWorld(nextDirection, s, n, t);
+//    ray.direction = localToWorld(nextDirection, s, n, t);
+    ray.direction = converter.convertToWorld(nextDirection);
     ray.origin = intersection.position + ray.direction * 0.002f;
 
     // 再帰でradiance取得

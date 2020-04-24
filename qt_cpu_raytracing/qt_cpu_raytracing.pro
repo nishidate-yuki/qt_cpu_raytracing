@@ -25,6 +25,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++17
 
 SOURCES += \
+        coordinateconverter.cpp \
         main.cpp \
         mainwindow.cpp \
         material.cpp \
@@ -38,6 +39,7 @@ SOURCES += \
         utils.cpp
 
 HEADERS += \
+        coordinateconverter.h \
         mainwindow.h \
         material.h \
         mesh.h \

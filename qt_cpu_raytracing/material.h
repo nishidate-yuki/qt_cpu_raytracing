@@ -49,6 +49,7 @@ class Light : public Material
 public:
     Light();
     Light(const QVector3D&);
+    Light(const float);
     ~Light() {}
 
     std::tuple<QVector3D, QVector3D> sample(const QVector3D& direction, int& depth) override;
