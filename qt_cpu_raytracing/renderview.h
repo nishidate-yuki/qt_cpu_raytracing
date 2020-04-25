@@ -18,6 +18,7 @@
 #include "mesh.h"
 #include "object.h"
 #include "coordinateconverter.h"
+#include "bvh.h"
 
 class RenderView : public QGraphicsView
 {

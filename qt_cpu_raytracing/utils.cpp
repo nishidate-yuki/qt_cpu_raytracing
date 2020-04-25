@@ -1,24 +1,29 @@
 #include "utils.h"
 
 
-float frand(){
+float frand()
+{
     return static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
 }
 
-float dot(const QVector3D& a, const QVector3D& b){
+float dot(const QVector3D& a, const QVector3D& b)
+{
     return QVector3D::dotProduct(a, b);
 }
 
-QVector3D cross(const QVector3D& a, const QVector3D& b){
+QVector3D cross(const QVector3D& a, const QVector3D& b)
+{
     return QVector3D::crossProduct(a, b);
 }
 
-QVector3D normalize(const QVector3D& v){
+QVector3D normalize(const QVector3D& v)
+{
     return v.normalized();
 }
 
 // ガンマ補正
-void gammaCorrection(QVector<QVector<QVector3D>> &fImage) {
+void gammaCorrection(QVector<QVector<QVector3D>> &fImage)
+{
     int width = fImage[0].size();
     int height = fImage.size();
 

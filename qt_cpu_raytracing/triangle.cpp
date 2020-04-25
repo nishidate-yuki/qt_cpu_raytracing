@@ -12,6 +12,11 @@ Triangle::Triangle(const QVector3D &v0, const QVector3D &v1, const QVector3D &v2
 
 }
 
+Triangle::~Triangle()
+{
+//    qDebug() << "Triangle deleted";
+}
+
 bool Triangle::intersect(const Ray &ray, Intersection &intersection)
 {
     // Tomas Mollerの交差判定
@@ -65,6 +70,17 @@ QVector3D Triangle::normal()
 }
 
 QVector3D &Triangle::operator[](int i)
+{
+    if(i == 0){
+        return v0;
+    }else if(i == 2){
+        return v1;
+    }else{
+        return v2;
+    }
+}
+
+const QVector3D &Triangle::operator[](int i) const
 {
     if(i == 0){
         return v0;

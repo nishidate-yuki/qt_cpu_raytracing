@@ -9,9 +9,9 @@ class CoordinateConverter
 public:
     CoordinateConverter(const QVector3D&);
 
-    QVector3D convertToLocal(const QVector3D&);
+    QVector3D toLocal(const QVector3D&);
 
-    QVector3D convertToWorld(const QVector3D&);
+    QVector3D toWorld(const QVector3D&);
 
 private:
     QVector3D u;

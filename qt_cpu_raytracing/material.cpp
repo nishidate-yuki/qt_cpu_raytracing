@@ -1,6 +1,7 @@
 #include "material.h"
 
-float absCosTheta(const QVector3D& v) {
+float absCosTheta(const QVector3D& v)
+{
     return abs(v.normalized().y());
 }
 
@@ -8,20 +9,23 @@ float theta(const QVector3D& v){
     return acos(v.normalized().y());
 }
 
-QVector3D reflect(const QVector3D& v, const QVector3D& n) {
+QVector3D reflect(const QVector3D& v, const QVector3D& n)
+{
     return -v + 2*dot(v, n)*n;
 }
 
 // フレネル反射率
 // Schlickの近似式を用いる
-float fresnel(const QVector3D& v, const QVector3D& n, float n1, float n2) {
+float fresnel(const QVector3D& v, const QVector3D& n, float n1, float n2)
+{
   float f0 = pow((n1 - n2)/(n1 + n2), 2.0);
   float cos = absCosTheta(v);
   return f0 + (1 - f0) * pow(1 - cos, 5.0);
 }
 
 // 全反射
-bool totalReflect(const QVector3D& v, float n1, float n2){
+bool totalReflect(const QVector3D& v, float n1, float n2)
+{
     // snellの法則から
     // n1 * sin(θ1) = n2 * sin(90°)
     //      sin(θ1) = n2 / n1
@@ -33,7 +37,8 @@ bool totalReflect(const QVector3D& v, float n1, float n2){
     return alpha * alpha > 1.0f;
 }
 
-QVector3D refract(const QVector3D& v, const QVector3D& n, float n1, float n2) {
+QVector3D refract(const QVector3D& v, const QVector3D& n, float n1, float n2)
+{
     float cos = absCosTheta(v);
     float sin = sqrt(qMax(1 - cos*cos, 0.0f));
     float alpha = n1/n2 * sin;

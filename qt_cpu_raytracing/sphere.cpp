@@ -13,7 +13,8 @@ Sphere::Sphere(const QVector3D &center, const float &radius, const std::shared_p
     this->material = material;
 }
 
-bool Sphere::intersect(const Ray &ray, Intersection& intersection){
+bool Sphere::intersect(const Ray &ray, Intersection& intersection)
+{
     QVector3D rayToSphere = ray.origin - center;
     float a = QVector3D::dotProduct(ray.direction, ray.direction);
     float b = QVector3D::dotProduct(rayToSphere, ray.direction);

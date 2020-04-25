@@ -33,7 +33,10 @@ void Mesh::createTriangles()
 {
     qDebug() << "indices size" << indices.size();
     for (int i=0; i<indices.size(); i += 3) {
-        Triangle triangle(positions[indices[i]], positions[indices[i+1]], positions[indices[i+2]]);
+        auto pos1 = positions[indices[i]];
+        auto pos2 = positions[indices[i+1]];
+        auto pos3 = positions[indices[i+2]];
+        auto triangle = std::make_shared<Triangle>(pos1, pos2, pos3);
         triangles.append(triangle);
     }
 }
@@ -43,7 +46,7 @@ bool Mesh::intersect(const Ray &ray, Intersection &intersection)
     bool hit = false;
     for (int i=0; i<triangles.size(); i++) {
         Intersection hitpoint;
-        if(triangles[i].intersect(ray, hitpoint)){
+        if(triangles[i]->intersect(ray, hitpoint)){
             if(hitpoint.distance < intersection.distance){
                 intersection = hitpoint;
                 hit = true;

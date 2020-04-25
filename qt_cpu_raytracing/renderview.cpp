@@ -1,6 +1,6 @@
 #include "renderview.h"
 
-const int NUM_SAMPLES = 64;
+const int NUM_SAMPLES = 20;
 constexpr int DEPTH = 32;
 
 RenderView::RenderView(QWidget *parent)
@@ -15,6 +15,7 @@ RenderView::RenderView(QWidget *parent)
 //    constexpr int height = 480;
     fImage = createImage(width, height);
     setImage();
+
 }
 
 void RenderView::render()
@@ -29,11 +30,11 @@ void RenderView::render()
 
     // materials
     auto diffuse = std::make_shared<Diffuse>();
-    auto redDiffuse = std::make_shared<Diffuse>(QVector3D(0.9, 0.4, 0.4));
-    auto greenDiffuse = std::make_shared<Diffuse>(QVector3D(0.4, 0.9, 0.4));
+    auto redDiffuse = std::make_shared<Diffuse>(QVector3D(0.9, 0.1, 0.1));
+    auto greenDiffuse = std::make_shared<Diffuse>(QVector3D(0.1, 0.9, 0.1));
     auto mirror = std::make_shared<Mirror>();
     auto glass = std::make_shared<Glass>();
-    auto light = std::make_shared<Light>(4);
+    auto light = std::make_shared<Light>(2);
     auto black = std::make_shared<Light>(0);
 
     // spheres
@@ -63,6 +64,11 @@ void RenderView::render()
     objects << std::make_shared<Sphere>(QVector3D(10, 0, 0), 3, light);
     objects << std::make_shared<Mesh>(importFbx("E:/3D Objects/bunny.fbx", 10.0f));
 
+    //------------------------------------------------------------
+    Mesh testMesh = importFbx("E:/3D Objects/bunny.fbx", 10.0f);
+    BVH bvh(testMesh);
+    //------------------------------------------------------------
+
     #pragma omp parallel for schedule(dynamic, 1)
     for (int h=0; h<height; h++) {
         for (int w=0; w<width; w++) {
@@ -81,8 +87,8 @@ void RenderView::render()
                 // radianceを計算
                 int depth = 0;
 //                fColor += radiance(ray, scene, depth);
-//                fColor += radiance(ray, objects, depth);
-                fColor += radiance(ray, cornellBox, depth);
+                fColor += radiance(ray, objects, depth);
+//                fColor += radiance(ray, cornellBox, depth);
             }
             fColor = fColor/NUM_SAMPLES;
             fColor = gammaCorrection(fColor);
@@ -113,14 +119,14 @@ QVector3D RenderView::radiance(Ray &ray, QVector<std::shared_ptr<Object>> &scene
     CoordinateConverter converter(intersection.normal);
 
     // world座標 -> local座標
-    QVector3D localDirection = converter.convertToLocal(-ray.direction);
+    QVector3D localDirection = converter.toLocal(-ray.direction);
 
     // rayの方向とweightを計算する
     // weight = BRDF * cosθ / pdf
     auto [nextDirection, weight] = obj->material->sample(localDirection, depth);
 
     // ray更新
-    ray.direction = converter.convertToWorld(nextDirection);
+    ray.direction = converter.toWorld(nextDirection);
     ray.origin = intersection.position + ray.direction * 0.002f;
 
     // 再帰でradiance取得

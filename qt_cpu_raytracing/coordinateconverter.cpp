@@ -13,12 +13,12 @@ CoordinateConverter::CoordinateConverter(const QVector3D &vector)
     w = cross(u, v);
 }
 
-QVector3D CoordinateConverter::convertToLocal(const QVector3D &vector)
+QVector3D CoordinateConverter::toLocal(const QVector3D &vector)
 {
     return QVector3D(dot(vector, u), dot(vector, v), dot(vector, w));
 }
 
-QVector3D CoordinateConverter::convertToWorld(const QVector3D &vector)
+QVector3D CoordinateConverter::toWorld(const QVector3D &vector)
 {
     QVector3D a(u.x(), v.x(), w.x());
     QVector3D b(u.y(), v.y(), w.y());

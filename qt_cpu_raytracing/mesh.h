@@ -29,7 +29,7 @@ public:
     QVector<QVector3D> getPositions(){return positions;}
     QVector<Vertex> getVertices(){return vertices;}
     QVector<int> getIndices(){return indices;}
-    QVector<Triangle> getTriangles(){return triangles;}
+    QVector<std::shared_ptr<Triangle>> getTriangles(){return triangles;}
     void createTriangles();
 
     bool intersect(const Ray &ray, Intersection &intersection) override;
@@ -38,7 +38,8 @@ private:
     QVector<QVector3D> positions;
     QVector<Vertex> vertices;
     QVector<int> indices;
-    QVector<Triangle> triangles;
+//    QVector<Triangle> triangles;
+    QVector<std::shared_ptr<Triangle>> triangles;
 };
 
 

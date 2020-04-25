@@ -25,6 +25,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++17
 
 SOURCES += \
+        bvh.cpp \
         coordinateconverter.cpp \
         main.cpp \
         mainwindow.cpp \
@@ -39,6 +40,7 @@ SOURCES += \
         utils.cpp
 
 HEADERS += \
+        bvh.h \
         coordinateconverter.h \
         mainwindow.h \
         material.h \
