@@ -19,12 +19,10 @@ void MainWindow::on_pushButton_clicked()
 {
     QElapsedTimer timer;
     timer.start();
+
+    ui->graphicsView->NUM_SAMPLES = ui->sampleBox->value();
     ui->graphicsView->render();
+
     qint64 elp = timer.elapsed();
     qDebug().nospace() << elp/1000 << "." << elp%1000 << "s";
-}
-
-void MainWindow::on_sampleBox_valueChanged(int arg1)
-{
-    ui->graphicsView->NUM_SAMPLES = arg1;
 }
