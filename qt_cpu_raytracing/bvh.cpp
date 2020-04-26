@@ -73,32 +73,46 @@ void constructBVH(QVector<std::shared_ptr<Triangle>> &triangles, std::shared_ptr
         qDebug() << "node is nullptr";
         return;
     }
+
+    // 全てのTrianglesでBBを初期化
     node->bbox = createBBfromTriangles(triangles);
 
+    // Triangleが1つなら葉ノードとして終了
     if(triangles.size() == 1){
         auto triangle = triangles[0];
         makeLeaf(node, triangle);
         return;
     }
 
+    // axisに対してソート
     int bestAxis = 0;
     auto lessThan = [bestAxis](auto a, auto b) {
         return calcCenter(createBB(a))[bestAxis] < calcCenter(createBB(b))[bestAxis];
     };
     sort(triangles.begin(), triangles.end(), lessThan);
+
+    // 子ノードを作成
+    // 必ず2つ以上のTriangleを含むので両方つくって良い
     node->left = std::make_shared<BVHnode>();
     node->right = std::make_shared<BVHnode>();
 
     // ポリゴンリストを分割
-    int bestSplitIndex = triangles.size() / 2 - 1; // ラスト2になったとき、1,1に割るため(-1)
+    // [0, 1, 2, 3] => id=1
+    // [0, 1, 2]    => id=0
+    // [0, 1]       => id=0
+    int bestSplitIndex = triangles.size() / 2 - 1;
 
+    // Trianglesを分割
     QVector<std::shared_ptr<Triangle>> left, right;
     for (int i=0; i<=bestSplitIndex; i++) {
-        left.push_back(triangles[i]);
+        left.append(triangles[i]);
     }
     for (int i=bestSplitIndex+1; i<triangles.size(); i++) {
-        right.push_back(triangles[i]);
+        right.append(triangles[i]);
     }
+
+    constructBVH(left, node->left);
+    constructBVH(right, node->right);
 }
 
 BVH::BVH(Mesh &mesh)
@@ -106,4 +120,52 @@ BVH::BVH(Mesh &mesh)
     root = std::make_shared<BVHnode>();
     auto triangles = mesh.getTriangles();
     constructBVH(triangles, root);
+}
+
+bool BoundingBox::intersect(const Ray &ray)
+{
+    float tMax =  FLT_MAX;  // AABB からレイが外に出る時刻
+    float tMin = -FLT_MAX;  // AABB にレイが侵入する時刻
+
+    for (int i=0; i<3; i++) {
+        // 軸に垂直の場合
+        if(abs(ray.direction[i]) < FLT_EPSILON){
+            // rayの始点が領域外ならばfalse
+            if(  ray.origin[i] < this->min[i]
+               || this->max[i] < ray.origin[i]){
+                return false;
+            }else{
+                continue;
+            }
+        }
+        float t1 = (this->min[i] - ray.origin[i])/ray.direction[i];
+        float t2 = (this->max[i] - ray.origin[i])/ray.direction[i];
+        float tNear = std::min(t1, t2);
+        float tFar = std::max(t1, t2);
+        tMin = std::max(tMin, tNear);
+        tMax = std::min(tMax, tFar);
+
+        // レイが外に出る時刻と侵入する時刻が逆転している
+        // => 交差していない
+        if (tMin > tMax) return false;
+    }
+    return true;
+}
+
+bool BVHnode::isLeaf(){
+    return triangle != nullptr;
+}
+
+bool BVHnode::intersect(const Ray &ray, Intersection &intersection)
+{
+    // BBと交差していない場合
+    if(!bbox.intersect(ray))
+        return false;
+
+    // 交差して、葉である場合
+    if(isLeaf())
+        return triangle->intersect(ray, intersection);
+
+    // 交差して、中間ノードである場合
+
 }

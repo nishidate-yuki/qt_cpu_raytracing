@@ -5,10 +5,12 @@
 #include <algorithm>
 #include "triangle.h"
 #include "mesh.h"
+#include "ray.h"
 
 // BB: BoundingBox
-struct BoundingBox
+class BoundingBox
 {
+public:
     QVector3D min;
     QVector3D max;
 
@@ -17,22 +19,31 @@ struct BoundingBox
         max{ -FLT_MAX, -FLT_MAX, -FLT_MAX }
     {
     }
+
+    bool intersect(const Ray &ray);
+
 };
 
 // BVH のノードの構造
-struct BVHnode
+class BVHnode
 {
+public:
     BoundingBox bbox;
     std::shared_ptr<BVHnode> left, right;
     std::shared_ptr<Triangle> triangle;
 
     BVHnode(): left(nullptr), right(nullptr), triangle(nullptr){}
+
+    bool isLeaf();
+    bool intersect(const Ray &ray, Intersection &intersection);
 };
 
-class BVH
+class BVH : public Object
 {
 public:
     BVH(Mesh&);
+
+//    bool intersect(const Ray &ray, Intersection &intersection) override;
 
 private:
     std::shared_ptr<BVHnode> root;
