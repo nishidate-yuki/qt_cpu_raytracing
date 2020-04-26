@@ -43,7 +43,7 @@ class BVH : public Object
 public:
     BVH(Mesh&);
 
-//    bool intersect(const Ray &ray, Intersection &intersection) override;
+    bool intersect(const Ray &ray, Intersection &intersection) override;
 
 private:
     std::shared_ptr<BVHnode> root;

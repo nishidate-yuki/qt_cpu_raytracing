@@ -122,6 +122,7 @@ BVH::BVH(Mesh &mesh)
     constructBVH(triangles, root);
 }
 
+
 bool BoundingBox::intersect(const Ray &ray)
 {
     float tMax =  FLT_MAX;  // AABB からレイが外に出る時刻
@@ -163,9 +164,25 @@ bool BVHnode::intersect(const Ray &ray, Intersection &intersection)
         return false;
 
     // 交差して、葉である場合
-    if(isLeaf())
-        return triangle->intersect(ray, intersection);
+    if(isLeaf()){
+        Intersection hitpoint;
+        if(triangle->intersect(ray, hitpoint)){
+            if(hitpoint.distance < intersection.distance){
+                intersection = hitpoint;
+                return true;
+            }
+        }
+        return false;
+    }
 
     // 交差して、中間ノードである場合
+    bool leftIntersection = left->intersect(ray, intersection);
+    bool rightIntersection = right->intersect(ray, intersection);
 
+    return leftIntersection || rightIntersection;
+}
+
+bool BVH::intersect(const Ray &ray, Intersection &intersection)
+{
+    return root->intersect(ray, intersection);
 }

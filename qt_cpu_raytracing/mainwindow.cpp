@@ -19,5 +19,6 @@ void MainWindow::on_pushButton_clicked()
     QElapsedTimer timer;
     timer.start();
     ui->graphicsView->render();
-    qDebug() << timer.elapsed()/1000 << "s";
+    qint64 elp = timer.elapsed();
+    qDebug().nospace() << elp/1000 << "." << elp%1000 << "s";
 }

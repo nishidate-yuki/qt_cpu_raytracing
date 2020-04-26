@@ -1,6 +1,6 @@
 #include "renderview.h"
 
-const int NUM_SAMPLES = 20;
+const int NUM_SAMPLES = 200;
 constexpr int DEPTH = 32;
 
 RenderView::RenderView(QWidget *parent)
@@ -62,11 +62,13 @@ void RenderView::render()
     QVector<std::shared_ptr<Object>> objects;
     objects << std::make_shared<Sphere>(QVector3D(-10, 0, 0), 3, mirror);
     objects << std::make_shared<Sphere>(QVector3D(10, 0, 0), 3, light);
-    objects << std::make_shared<Mesh>(importFbx("E:/3D Objects/bunny.fbx", 10.0f));
+//    objects << std::make_shared<Mesh>(importFbx("E:/3D Objects/bunny.fbx", 10.0f));
 
     //------------------------------------------------------------
     Mesh testMesh = importFbx("E:/3D Objects/bunny.fbx", 10.0f);
-    BVH bvh(testMesh);
+    auto bvh = std::make_shared<BVH>(testMesh);
+    bvh->setMaterial(diffuse);
+    objects << bvh;
     //------------------------------------------------------------
 
     #pragma omp parallel for schedule(dynamic, 1)
