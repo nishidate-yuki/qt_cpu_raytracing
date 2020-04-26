@@ -1,6 +1,5 @@
 #include "renderview.h"
 
-const int NUM_SAMPLES = 200;
 constexpr int DEPTH = 32;
 
 RenderView::RenderView(QWidget *parent)
@@ -9,10 +8,10 @@ RenderView::RenderView(QWidget *parent)
     graphicsScene = new QGraphicsScene();
     setScene(graphicsScene);
 
-    constexpr int width = 640;
-    constexpr int height = 360;
-//    constexpr int width = 480;
-//    constexpr int height = 480;
+//    constexpr int width = 640;
+//    constexpr int height = 360;
+    constexpr int width = 480;
+    constexpr int height = 480;
     fImage = createImage(width, height);
     setImage();
 
@@ -34,16 +33,10 @@ void RenderView::render()
     auto greenDiffuse = std::make_shared<Diffuse>(QVector3D(0.1, 0.9, 0.1));
     auto mirror = std::make_shared<Mirror>();
     auto glass = std::make_shared<Glass>();
-    auto light = std::make_shared<Light>(2);
+    auto light = std::make_shared<Light>(5);
     auto black = std::make_shared<Light>(0);
 
-    // spheres
-    QVector<std::shared_ptr<Object>> scene;
-    scene << std::make_shared<Sphere>(QVector3D( 10, 0, 0),  4, light);
-    scene << std::make_shared<Sphere>(QVector3D(-10, 0, 0), 4, redDiffuse);
-    scene << std::make_shared<Sphere>(QVector3D(  0, 0, 0),   4, glass);
-    scene << std::make_shared<Sphere>(QVector3D(0, -10004, 0), 10000, diffuse);
-
+    //------------------------------------------------------------
     // cornell box
     float boxSize = 16;
     float sphereRad = 3;
@@ -54,21 +47,23 @@ void RenderView::render()
     cornellBox << std::make_shared<Sphere>(QVector3D(-(10000+boxSize/2), 0, 0), 10000, redDiffuse); // left
     cornellBox << std::make_shared<Sphere>(QVector3D(0, 0, -(10000+boxSize/2)), 10000, diffuse); // front
     cornellBox << std::make_shared<Sphere>(QVector3D(0, 0, 10030), 10000, black); // back
-    cornellBox << std::make_shared<Sphere>(QVector3D(4, -(boxSize/2)+sphereRad, 3), sphereRad, diffuse);
     cornellBox << std::make_shared<Sphere>(QVector3D(0, boxSize/2+9, 0), 10, light); // ceiling light
-    cornellBox << std::make_shared<Sphere>(QVector3D(-4, -(boxSize/2)+sphereRad, 1), sphereRad, glass);
 
+//    cornellBox << std::make_shared<Sphere>(QVector3D(4, -(boxSize/2)+sphereRad, 3), sphereRad, diffuse);
+//    cornellBox << std::make_shared<Sphere>(QVector3D(-4, -(boxSize/2)+sphereRad, 1), sphereRad, glass);
+
+    Mesh bunnyHigh = importFbx("E:/3D Objects/cornell_box/bunny.fbx");
+    cornellBox << std::make_shared<BVH>(bunnyHigh);
+    //------------------------------------------------------------
+
+
+    //------------------------------------------------------------
     // Objects
     QVector<std::shared_ptr<Object>> objects;
     objects << std::make_shared<Sphere>(QVector3D(-10, 0, 0), 3, mirror);
     objects << std::make_shared<Sphere>(QVector3D(10, 0, 0), 3, light);
-//    objects << std::make_shared<Mesh>(importFbx("E:/3D Objects/bunny.fbx", 10.0f));
-
-    //------------------------------------------------------------
-    Mesh testMesh = importFbx("E:/3D Objects/bunny.fbx", 10.0f);
-    auto bvh = std::make_shared<BVH>(testMesh);
-    bvh->setMaterial(diffuse);
-    objects << bvh;
+    Mesh bunny = importFbx("E:/3D Objects/bunny_high.fbx");
+    objects << std::make_shared<BVH>(bunny);
     //------------------------------------------------------------
 
     #pragma omp parallel for schedule(dynamic, 1)
@@ -80,7 +75,7 @@ void RenderView::render()
                 QVector3D screenPosition;
                 screenPosition[0] = (w+frand())/width * screenWidth - screenWidth/2.0;
                 screenPosition[1] = (height-(h+frand()))/height * screenHeight - screenHeight/2.0;
-                screenPosition[2] = cameraPosition[2] - 20;
+                screenPosition[2] = cameraPosition[2] - 18;
 
                 // rayを生成
                 Ray ray(cameraPosition);
@@ -88,9 +83,8 @@ void RenderView::render()
 
                 // radianceを計算
                 int depth = 0;
-//                fColor += radiance(ray, scene, depth);
-                fColor += radiance(ray, objects, depth);
-//                fColor += radiance(ray, cornellBox, depth);
+//                fColor += radiance(ray, objects, depth);
+                fColor += radiance(ray, cornellBox, depth);
             }
             fColor = fColor/NUM_SAMPLES;
             fColor = gammaCorrection(fColor);

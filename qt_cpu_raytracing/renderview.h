@@ -34,6 +34,8 @@ public:
     void setImage();
     void updateImage();
 
+    int NUM_SAMPLES = 100;
+
 private:
     QGraphicsScene* graphicsScene;
     QGraphicsPixmapItem* pixmapItem;

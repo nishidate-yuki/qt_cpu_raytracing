@@ -7,6 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->sampleBox->setValue(100);
 }
 
 MainWindow::~MainWindow()
@@ -21,4 +22,9 @@ void MainWindow::on_pushButton_clicked()
     ui->graphicsView->render();
     qint64 elp = timer.elapsed();
     qDebug().nospace() << elp/1000 << "." << elp%1000 << "s";
+}
+
+void MainWindow::on_sampleBox_valueChanged(int arg1)
+{
+    ui->graphicsView->NUM_SAMPLES = arg1;
 }

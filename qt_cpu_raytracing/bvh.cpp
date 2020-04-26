@@ -67,15 +67,20 @@ BoundingBox createBBfromTriangles(const QVector<std::shared_ptr<Triangle>> &tria
     return bbox;
 }
 
+void sortByAxis(QVector<std::shared_ptr<Triangle>> &triangles, int axis)
+{
+    auto lessThan = [axis](auto a, auto b) {
+        return calcCenter(createBB(a))[axis] < calcCenter(createBB(b))[axis];
+    };
+    sort(triangles.begin(), triangles.end(), lessThan);
+}
+
 void constructBVH(QVector<std::shared_ptr<Triangle>> &triangles, std::shared_ptr<BVHnode> &node)
 {
     if(node == nullptr){
         qDebug() << "node is nullptr";
         return;
     }
-
-    // 全てのTrianglesでBBを初期化
-    node->bbox = createBBfromTriangles(triangles);
 
     // Triangleが1つなら葉ノードとして終了
     if(triangles.size() == 1){
@@ -84,12 +89,12 @@ void constructBVH(QVector<std::shared_ptr<Triangle>> &triangles, std::shared_ptr
         return;
     }
 
+    // 全てのTrianglesでBBを初期化
+    node->bbox = createBBfromTriangles(triangles);
+
     // axisに対してソート
     int bestAxis = 0;
-    auto lessThan = [bestAxis](auto a, auto b) {
-        return calcCenter(createBB(a))[bestAxis] < calcCenter(createBB(b))[bestAxis];
-    };
-    sort(triangles.begin(), triangles.end(), lessThan);
+    sortByAxis(triangles, bestAxis);
 
     // 子ノードを作成
     // 必ず2つ以上のTriangleを含むので両方つくって良い
