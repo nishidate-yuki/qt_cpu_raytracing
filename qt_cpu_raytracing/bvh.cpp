@@ -75,6 +75,53 @@ void sortByAxis(QVector<std::shared_ptr<Triangle>> &triangles, int axis)
     sort(triangles.begin(), triangles.end(), lessThan);
 }
 
+//void constructBVH(QVector<std::shared_ptr<Triangle>> &triangles, std::shared_ptr<BVHnode> &node)
+//{
+//    if(node == nullptr){
+//        qDebug() << "node is nullptr";
+//        return;
+//    }
+
+//    // Triangleが1つなら葉ノードとして終了
+//    if(triangles.size() == 1){
+//        auto triangle = triangles[0];
+//        makeLeaf(node, triangle);
+//        return;
+//    }
+
+//    // Trianglesで全体のBBを設定する
+//    // LeafはBBではなく直接Triangleと交差判定を行うため必要ない
+//    node->bbox = createBBfromTriangles(triangles);
+
+//    // axisに対してソート
+//    int bestAxis = 0;
+//    sortByAxis(triangles, bestAxis);
+
+//    // 子ノードを作成
+//    // 必ず2つ以上のTriangleを含むので両方つくって良い
+//    node->left = std::make_shared<BVHnode>();
+//    node->right = std::make_shared<BVHnode>();
+
+//    // ポリゴンリストを分割
+//    // [0, 1, 2, 3] => id=1
+//    // [0, 1, 2]    => id=0
+//    // [0, 1]       => id=0
+//    int bestSplitIndex = triangles.size() / 2 - 1;
+
+//    // Trianglesを分割
+//    QVector<std::shared_ptr<Triangle>> left, right;
+//    for (int i=0; i<=bestSplitIndex; i++) {
+//        left.append(triangles[i]);
+//    }
+//    for (int i=bestSplitIndex+1; i<triangles.size(); i++) {
+//        right.append(triangles[i]);
+//    }
+
+//    constructBVH(left, node->left);
+//    constructBVH(right, node->right);
+//}
+
+
 void constructBVH(QVector<std::shared_ptr<Triangle>> &triangles, std::shared_ptr<BVHnode> &node)
 {
     if(node == nullptr){
@@ -89,23 +136,62 @@ void constructBVH(QVector<std::shared_ptr<Triangle>> &triangles, std::shared_ptr
         return;
     }
 
-    // 全てのTrianglesでBBを初期化
+    // Trianglesで全体のBBを設定する
+    // LeafはBBではなく直接Triangleと交差判定を行うため必要ない
     node->bbox = createBBfromTriangles(triangles);
 
-    // axisに対してソート
-    int bestAxis = 0;
+    // 一番いい axis, index, cost の組み合わせ
+    auto bestDivision = std::make_tuple(0, 0, FLT_MAX);
+
+    // ---------------------------------------------
+    // -------ここでSAHによって分割方法を決定する------
+
+    // 全体の表面積
+    float rootSA = calcSurfaceArea(node->bbox);
+
+    for (int axis=0; axis<3; axis++){
+        // axisでソート
+        sortByAxis(triangles, axis);
+
+        QVector<std::shared_ptr<Triangle>> leftTris;
+        auto rightTris = triangles;
+
+        // triangleを1つずつ左に移しながら評価する
+        for (int i=0; i<triangles.size()-1; i++){
+            BoundingBox leftBB = createBBfromTriangles(leftTris);
+            BoundingBox rightBB = createBBfromTriangles(rightTris);
+
+            float leftSA = calcSurfaceArea(leftBB);
+            float rightSA = calcSurfaceArea(rightBB);
+
+            float cost = 2*1
+                         + (leftSA*leftTris.size() + rightSA*rightTris.size())
+                               * 1 / rootSA;
+            if(cost < std::get<2>(bestDivision)){
+                bestDivision = std::make_tuple(axis, i, cost);
+//                qDebug() << "bestDivision" << axis << i << cost;
+            }
+
+            // right->left に tri を移動
+            auto tmp = rightTris.front();
+            leftTris.append(tmp);
+            rightTris.pop_front();
+        }
+    }
+
+    // ---------------------------------------------
+
+    // 一番良い分割情報
+    int bestAxis = std::get<0>(bestDivision);
+    int bestSplitIndex = std::get<1>(bestDivision);
+//    qDebug() << "Best Div:" << bestAxis << "," << bestSplitIndex
+//             << "| size" << triangles.size();
     sortByAxis(triangles, bestAxis);
 
     // 子ノードを作成
     // 必ず2つ以上のTriangleを含むので両方つくって良い
     node->left = std::make_shared<BVHnode>();
     node->right = std::make_shared<BVHnode>();
-
-    // ポリゴンリストを分割
-    // [0, 1, 2, 3] => id=1
-    // [0, 1, 2]    => id=0
-    // [0, 1]       => id=0
-    int bestSplitIndex = triangles.size() / 2 - 1;
 
     // Trianglesを分割
     QVector<std::shared_ptr<Triangle>> left, right;
@@ -115,6 +201,8 @@ void constructBVH(QVector<std::shared_ptr<Triangle>> &triangles, std::shared_ptr
     for (int i=bestSplitIndex+1; i<triangles.size(); i++) {
         right.append(triangles[i]);
     }
+
+//    qDebug() << "size" << left.size() << "," << right.size();
 
     constructBVH(left, node->left);
     constructBVH(right, node->right);

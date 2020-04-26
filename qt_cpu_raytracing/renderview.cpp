@@ -59,11 +59,11 @@ void RenderView::render()
 
     //------------------------------------------------------------
     // Objects
-    QVector<std::shared_ptr<Object>> objects;
-    objects << std::make_shared<Sphere>(QVector3D(-10, 0, 0), 3, mirror);
-    objects << std::make_shared<Sphere>(QVector3D(10, 0, 0), 3, light);
-    Mesh bunny = importFbx("E:/3D Objects/bunny_high.fbx");
-    objects << std::make_shared<BVH>(bunny);
+//    QVector<std::shared_ptr<Object>> objects;
+//    objects << std::make_shared<Sphere>(QVector3D(-10, 0, 0), 3, mirror);
+//    objects << std::make_shared<Sphere>(QVector3D(10, 0, 0), 3, light);
+//    Mesh bunny = importFbx("E:/3D Objects/bunny_high.fbx");
+//    objects << std::make_shared<BVH>(bunny);
     //------------------------------------------------------------
 
     #pragma omp parallel for schedule(dynamic, 1)

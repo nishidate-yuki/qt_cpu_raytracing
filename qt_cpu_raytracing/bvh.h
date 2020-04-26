@@ -6,6 +6,7 @@
 #include "triangle.h"
 #include "mesh.h"
 #include "ray.h"
+#include <tuple>
 
 // BB: BoundingBox
 class BoundingBox
