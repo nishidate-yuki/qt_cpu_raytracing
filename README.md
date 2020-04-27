@@ -8,8 +8,9 @@
 
 - FBX SDK
 - BVH using SAH
+- Next Event Estimation
 
 ## TODO
 
-- Next Event Estimation
 - Russian Roulette
+- Spectral Rendering
