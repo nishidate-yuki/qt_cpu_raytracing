@@ -179,3 +179,13 @@ QVector3D AreaLight::samplePoint()
 {
     return origin + frand()*edge1 + frand()*edge2;
 }
+
+float AreaLight::areaPDF()
+{
+    return 1.0f / (size*size);
+}
+
+QVector3D AreaLight::normal()
+{
+    return {0, -1, 0};
+}

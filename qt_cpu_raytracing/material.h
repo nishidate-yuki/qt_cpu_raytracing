@@ -16,6 +16,7 @@ class Material
 public:
     // dir, weight を返す
     virtual std::tuple<QVector3D, QVector3D> sample(const QVector3D& direction, int& depth) = 0;
+    virtual QVector3D evaluate(const QVector3D&, const QVector3D&) = 0;
 
     QVector3D getColor() {return color;}
     QVector3D getEmission() {return emission;}
@@ -33,6 +34,7 @@ public:
     ~Diffuse() {}
 
     std::tuple<QVector3D, QVector3D> sample(const QVector3D& direction, int& depth) override;
+    QVector3D evaluate(const QVector3D&, const QVector3D&) override;
 };
 
 class Mirror : public Material
@@ -42,6 +44,7 @@ public:
     ~Mirror() {}
 
     std::tuple<QVector3D, QVector3D> sample(const QVector3D& direction, int& depth) override;
+    QVector3D evaluate(const QVector3D&, const QVector3D&) override{return QVector3D();}
 };
 
 class Light : public Material
@@ -53,6 +56,7 @@ public:
     ~Light() {}
 
     std::tuple<QVector3D, QVector3D> sample(const QVector3D& direction, int& depth) override;
+    QVector3D evaluate(const QVector3D&, const QVector3D&) override{return QVector3D();}
 };
 
 class Glass : public Material
@@ -62,6 +66,7 @@ public:
     ~Glass() {}
 
     std::tuple<QVector3D, QVector3D> sample(const QVector3D& direction, int& depth) override;
+    QVector3D evaluate(const QVector3D&, const QVector3D&) override{return QVector3D();}
 
     float ior;
 };

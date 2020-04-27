@@ -69,7 +69,18 @@ std::tuple<QVector3D, QVector3D> Diffuse::sample(const QVector3D &direction, int
     float x = d * cos(phi);
     float z = d * sin(phi);
 
+    // weight = BRDF * cosθ / pdf
+    // BRDF: ρ/π
+    // pdf : cosθ / π
+    // weight = ρ
+    //        = color
     return {{x, y, z}, color};
+}
+
+QVector3D Diffuse::evaluate(const QVector3D &shadowDir, const QVector3D &viewDir)
+{
+    // fs(BRDf)を返す
+    return color / M_PI;
 }
 
 // Mirror

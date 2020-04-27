@@ -49,6 +49,11 @@ public:
     AreaLight(float size, float height, float intensity);
 
     QVector3D samplePoint();
+
+    float areaPDF();
+
+    QVector3D normal();
+
 private:
     float size;
     float height;

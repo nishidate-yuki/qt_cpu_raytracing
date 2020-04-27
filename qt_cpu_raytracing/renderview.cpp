@@ -55,8 +55,8 @@ void RenderView::render()
     cornellBox << std::make_shared<BVH>(bunnyHigh);
 
     // area light
-    areaLight = AreaLight(4, boxSize/2 - 0.01f, 5);
-    cornellBox << std::make_shared<Mesh>(areaLight);
+    areaLight = AreaLight(4, boxSize/2 - 0.01f, 20);
+    cornellBox << std::make_shared<AreaLight>(areaLight);
     //------------------------------------------------------------
 
 
@@ -114,6 +114,14 @@ QVector3D RenderView::radiance(Ray &ray, QVector<std::shared_ptr<Object>> &scene
     if(!intersectScene(ray, scene, intersection)) return sky.getRadiance(ray);
     std::shared_ptr<Object> obj = scene[intersection.objectIndex];
 
+    // first rayの場合のみ、光源に当たったら寄与を蓄積する
+    auto material = obj->material.get();
+    if(depth == 0){
+        if(typeid(*material) == typeid(Light)){
+            return obj->material->getEmission();
+        }
+    }
+
     // ローカル座標系を作る
     CoordinateConverter converter(intersection.normal);
 
@@ -128,18 +136,56 @@ QVector3D RenderView::radiance(Ray &ray, QVector<std::shared_ptr<Object>> &scene
     ray.direction = converter.toWorld(nextDirection);
     ray.origin = intersection.position + ray.direction * 0.002f;
 
-    // 再帰でradiance取得
-    if(depth > DEPTH) return obj->material->getEmission();
-    QVector3D inRandiance = radiance(ray, scene, depth);
+
 
     // Emittion
-    QVector3D emittion = obj->material->getEmission();
+    QVector3D emittion;
+
+    // next event estimation
+
+    // Mirror以外でNEE実行
+    if(typeid(*material) != typeid(Mirror)){
+        QVector3D lightPoint = areaLight.samplePoint();
+        QVector3D lightNormal = areaLight.normal();
+        QVector3D shadowDir = normalize(lightPoint - intersection.position);
+        QVector3D shadowOri = intersection.position + shadowDir*0.002f;
+        Ray shadowRay(shadowOri, shadowDir);
+
+        Intersection shadowInter;
+        if(intersectScene(shadowRay, scene, shadowInter)){
+            std::shared_ptr<Object> shadowObj = scene[shadowInter.objectIndex];
+            auto shadowMesh = shadowObj.get();
+            if(typeid(*shadowMesh) == typeid(AreaLight)){
+                // NEEで光源にヒットした場合
+                QVector3D fs = obj->material->evaluate(shadowDir, -ray.direction);
+                float areaPDF = areaLight.areaPDF();
+                float jacobian = abs(dot(intersection.normal, shadowDir))
+                                 * abs(dot(lightNormal, shadowDir))
+                                 / pow(length(lightPoint - intersection.position), 2);
+//                emittion = shadowObj->material->getEmission();
+                emittion = fs * areaLight.material->getEmission() * jacobian / areaPDF;
+//                if(depth==1){
+//                    qDebug() << "fs       " << fs;
+//                    qDebug() << "areaPDF  " << areaPDF;
+//                    qDebug() << "jacobian " << jacobian;
+//                    qDebug() << "emittion " << emittion;
+//                    qDebug();
+//                }
+            }
+        }
+    }
+
+
+
+    // 再帰でradiance取得
+    //    if(depth > DEPTH) return obj->material->getEmission();
+    if(depth > DEPTH) return emittion;
+
+    QVector3D inRandiance = radiance(ray, scene, depth);
 
     // 最終的なレンダリング方程式
     // Lo = Le + (BRDF * Li * cosθ)/pdf
-    QVector3D rad = emittion + weight * inRandiance;
-
-    return rad;
+    return emittion + weight * inRandiance;
 }
 
 void RenderView::setImage()

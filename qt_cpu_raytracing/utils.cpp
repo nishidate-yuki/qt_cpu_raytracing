@@ -69,3 +69,8 @@ QColor colorFromVector(QVector3D &fColor)
 //    QTimer::singleShot(msec, &loop, SLOT(quit()));
 //    loop.exec();
 //}
+
+float length(const QVector3D &v)
+{
+    return v.length();
+}
