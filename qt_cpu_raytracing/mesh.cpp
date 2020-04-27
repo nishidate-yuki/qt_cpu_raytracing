@@ -155,6 +155,7 @@ Mesh importFbx(const char* filename, const float scale, const QVector3D& offset)
 }
 
 AreaLight::AreaLight(float size, float height, float intensity)
+    : size(size), height(height)
 {
     QVector3D v0 = {-size/2, height,  size/2};
     QVector3D v1 = {-size/2, height, -size/2};
@@ -163,10 +164,18 @@ AreaLight::AreaLight(float size, float height, float intensity)
     auto tri1 = std::make_shared<Triangle>(v0, v3, v1);
     auto tri2 = std::make_shared<Triangle>(v1, v3, v2);
 
+    origin = v1;
+    edge1 = v0 - v1;
+    edge2 = v2 - v1;
+
     appengTriangle(tri1);
     appengTriangle(tri2);
 
     auto light = std::make_shared<Light>(intensity);
     setMaterial(light);
+}
 
+QVector3D AreaLight::samplePoint()
+{
+    return origin + frand()*edge1 + frand()*edge2;
 }

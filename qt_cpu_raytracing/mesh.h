@@ -48,6 +48,13 @@ public:
     AreaLight(){}
     AreaLight(float size, float height, float intensity);
 
+    QVector3D samplePoint();
+private:
+    float size;
+    float height;
+    QVector3D edge1;
+    QVector3D edge2;
+    QVector3D origin;
 };
 
 

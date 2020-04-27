@@ -55,7 +55,7 @@ void RenderView::render()
     cornellBox << std::make_shared<BVH>(bunnyHigh);
 
     // area light
-    areaLight = AreaLight(4, boxSize/2 - 0.01f, 6);
+    areaLight = AreaLight(4, boxSize/2 - 0.01f, 5);
     cornellBox << std::make_shared<Mesh>(areaLight);
     //------------------------------------------------------------
 
@@ -132,16 +132,12 @@ QVector3D RenderView::radiance(Ray &ray, QVector<std::shared_ptr<Object>> &scene
     if(depth > DEPTH) return obj->material->getEmission();
     QVector3D inRandiance = radiance(ray, scene, depth);
 
-    // Radiance
+    // Emittion
+    QVector3D emittion = obj->material->getEmission();
+
     // 最終的なレンダリング方程式
     // Lo = Le + (BRDF * Li * cosθ)/pdf
-    QVector3D rad = obj->material->getEmission() + weight * inRandiance;
-
-    // next event estimation
-//    auto entity = obj.get();
-//    if(typeid(*entity) != typeid(Mirror)){
-//        QVector3D lightPoint;
-//    }
+    QVector3D rad = emittion + weight * inRandiance;
 
     return rad;
 }
