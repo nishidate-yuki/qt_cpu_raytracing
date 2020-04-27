@@ -8,8 +8,6 @@ RenderView::RenderView(QWidget *parent)
     graphicsScene = new QGraphicsScene();
     setScene(graphicsScene);
 
-//    constexpr int width = 640;
-//    constexpr int height = 360;
     constexpr int width = 480;
     constexpr int height = 480;
     fImage = createImage(width, height);
@@ -39,7 +37,7 @@ void RenderView::render()
     //------------------------------------------------------------
     // cornell box
     float boxSize = 16;
-    float sphereRad = 3;
+    float sphereRad = 2;
     QVector<std::shared_ptr<Object>> cornellBox;
     cornellBox << std::make_shared<Sphere>(QVector3D(0, -(10000+boxSize/2), 0), 10000, diffuse); // floor
     cornellBox << std::make_shared<Sphere>(QVector3D(0, (10000+boxSize/2), 0), 10000, diffuse);  // ceiling
@@ -47,12 +45,11 @@ void RenderView::render()
     cornellBox << std::make_shared<Sphere>(QVector3D(-(10000+boxSize/2), 0, 0), 10000, redDiffuse); // left
     cornellBox << std::make_shared<Sphere>(QVector3D(0, 0, -(10000+boxSize/2)), 10000, diffuse); // front
     cornellBox << std::make_shared<Sphere>(QVector3D(0, 0, 10030), 10000, black); // back
-//    cornellBox << std::make_shared<Sphere>(QVector3D(0, boxSize/2+9, 0), 10, light); // ceiling light
-//    cornellBox << std::make_shared<Sphere>(QVector3D(4, -(boxSize/2)+sphereRad, 3), sphereRad, diffuse);
-//    cornellBox << std::make_shared<Sphere>(QVector3D(-4, -(boxSize/2)+sphereRad, 1), sphereRad, glass);
+    cornellBox << std::make_shared<Sphere>(QVector3D(5, -(boxSize/2)+sphereRad, 3), sphereRad, mirror);
+    cornellBox << std::make_shared<Sphere>(QVector3D(-5, -(boxSize/2)+sphereRad, 1), sphereRad, glass);
 
-    Mesh bunnyHigh = importFbx("E:/3D Objects/cornell_box/bunny.fbx");
-    cornellBox << std::make_shared<BVH>(bunnyHigh);
+//    Mesh bunnyHigh = importFbx("E:/3D Objects/cornell_box/bunny.fbx");
+//    cornellBox << std::make_shared<BVH>(bunnyHigh);
 
     // area light
     areaLight = AreaLight(4, boxSize/2 - 0.01f, 20);
@@ -86,7 +83,7 @@ void RenderView::render()
 
                 // radianceを計算
                 int depth = 0;
-//                fColor += radiance(ray, objects, depth);
+//                fColor += radianceIBL(ray, objects, depth);
                 fColor += radiance(ray, cornellBox, depth);
             }
             fColor = fColor/NUM_SAMPLES;
@@ -102,16 +99,13 @@ void RenderView::render()
     pixmapItem->setPixmap(QPixmap::fromImage(*image));
 
     image->save("E:/Desktop/dev/render.png");
-
 }
 
 QVector3D RenderView::radiance(Ray &ray, QVector<std::shared_ptr<Object>> &scene, int &depth)
 {
-    static IBL sky("E:/Pictures/Textures/_HDRI/4k/rural_landscape_4k.hdr");
-
     // シーンとの交差判定
     Intersection intersection;
-    if(!intersectScene(ray, scene, intersection)) return sky.getRadiance(ray);
+    if(!intersectScene(ray, scene, intersection)) return {0, 0, 0};
     std::shared_ptr<Object> obj = scene[intersection.objectIndex];
 
     // first rayの場合のみ、光源に当たったら寄与を蓄積する
@@ -136,56 +130,53 @@ QVector3D RenderView::radiance(Ray &ray, QVector<std::shared_ptr<Object>> &scene
     ray.direction = converter.toWorld(nextDirection);
     ray.origin = intersection.position + ray.direction * 0.002f;
 
-
-
     // Emittion
     QVector3D emittion;
+    QVector3D inRadiance;
 
-    // next event estimation
-
-    // Mirror以外でNEE実行
-    if(typeid(*material) != typeid(Mirror)){
+    // Next Event Estimation
+    // MirrorとGlass以外でNEE実行
+    if(typeid(*material) != typeid(Mirror) && typeid(*material) != typeid(Glass)){
+        // shadow rayを計算
         QVector3D lightPoint = areaLight.samplePoint();
         QVector3D lightNormal = areaLight.normal();
         QVector3D shadowDir = normalize(lightPoint - intersection.position);
         QVector3D shadowOri = intersection.position + shadowDir*0.002f;
         Ray shadowRay(shadowOri, shadowDir);
 
+        // shadow rayを飛ばす
         Intersection shadowInter;
         if(intersectScene(shadowRay, scene, shadowInter)){
-            std::shared_ptr<Object> shadowObj = scene[shadowInter.objectIndex];
-            auto shadowMesh = shadowObj.get();
-            if(typeid(*shadowMesh) == typeid(AreaLight)){
-                // NEEで光源にヒットした場合
+            // ヒットしたオブジェクトのクラスを調べる
+            // shared_ptrの中身を取り出す
+            auto shadowObj = scene[shadowInter.objectIndex].get();
+            // 光源にヒットした場合
+            if(typeid(*shadowObj) == typeid(AreaLight)){
                 QVector3D fs = obj->material->evaluate(shadowDir, -ray.direction);
                 float areaPDF = areaLight.areaPDF();
                 float jacobian = abs(dot(intersection.normal, shadowDir))
                                  * abs(dot(lightNormal, shadowDir))
                                  / pow(length(lightPoint - intersection.position), 2);
-//                emittion = shadowObj->material->getEmission();
                 emittion = fs * areaLight.material->getEmission() * jacobian / areaPDF;
-//                if(depth==1){
-//                    qDebug() << "fs       " << fs;
-//                    qDebug() << "areaPDF  " << areaPDF;
-//                    qDebug() << "jacobian " << jacobian;
-//                    qDebug() << "emittion " << emittion;
-//                    qDebug();
-//                }
             }
         }
+        // 再帰でradiance取得
+        if(depth > DEPTH) return emittion;
+
+        inRadiance = radiance(ray, scene, depth);
+    }else{
+        if(depth > DEPTH) return obj->material->getEmission();
+        inRadiance = radianceIBL(ray, scene, depth);
     }
 
+//    // 再帰でradiance取得
+//    if(depth > DEPTH) return emittion;
 
-
-    // 再帰でradiance取得
-    //    if(depth > DEPTH) return obj->material->getEmission();
-    if(depth > DEPTH) return emittion;
-
-    QVector3D inRandiance = radiance(ray, scene, depth);
+//    QVector3D inRandiance = radiance(ray, scene, depth);
 
     // 最終的なレンダリング方程式
     // Lo = Le + (BRDF * Li * cosθ)/pdf
-    return emittion + weight * inRandiance;
+    return emittion + weight * inRadiance;
 }
 
 void RenderView::setImage()
@@ -232,3 +223,40 @@ void RenderView::updateImage()
 }
 
 
+
+QVector3D RenderView::radianceIBL(Ray &ray, QVector<std::shared_ptr<Object>> &scene, int &depth)
+{
+    static IBL sky("E:/Pictures/Textures/_HDRI/4k/rural_landscape_4k.hdr");
+
+    // シーンとの交差判定
+    Intersection intersection;
+    if(!intersectScene(ray, scene, intersection)) return sky.getRadiance(ray);
+    std::shared_ptr<Object> obj = scene[intersection.objectIndex];
+
+    // ローカル座標系を作る
+    CoordinateConverter converter(intersection.normal);
+
+    // world座標 -> local座標
+    QVector3D localDirection = converter.toLocal(-ray.direction);
+
+    // rayの方向とweightを計算する
+    // weight = BRDF * cosθ / pdf
+    auto [nextDirection, weight] = obj->material->sample(localDirection, depth);
+
+    // ray更新
+    ray.direction = converter.toWorld(nextDirection);
+    ray.origin = intersection.position + ray.direction * 0.002f;
+
+    // 再帰でradiance取得
+    if(depth > DEPTH) return obj->material->getEmission();
+    QVector3D inRandiance = radianceIBL(ray, scene, depth);
+
+    // Emittion
+    QVector3D emittion = obj->material->getEmission();
+
+    // 最終的なレンダリング方程式
+    // Lo = Le + (BRDF * Li * cosθ)/pdf
+    QVector3D rad = emittion + weight * inRandiance;
+
+    return rad;
+}

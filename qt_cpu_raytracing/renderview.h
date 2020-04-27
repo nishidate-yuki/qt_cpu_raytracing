@@ -31,6 +31,7 @@ public:
     QVector3D radiance(Ray& ray, Mesh& mesh, int& depth);
     QVector3D radiance(Ray&, QVector<Sphere>&, int&);
     QVector3D radiance(Ray&, QVector<std::shared_ptr<Object>>&, int&);
+    QVector3D radianceIBL(Ray&, QVector<std::shared_ptr<Object>>&, int&);
     void setImage();
     void updateImage();
 
