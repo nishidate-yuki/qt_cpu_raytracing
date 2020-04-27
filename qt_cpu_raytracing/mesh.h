@@ -31,6 +31,7 @@ public:
     QVector<int> getIndices(){return indices;}
     QVector<std::shared_ptr<Triangle>> getTriangles(){return triangles;}
     void createTriangles();
+    void appengTriangle(const std::shared_ptr<Triangle>&);
 
     bool intersect(const Ray &ray, Intersection &intersection) override;
 
@@ -40,6 +41,13 @@ private:
     QVector<int> indices;
 //    QVector<Triangle> triangles;
     QVector<std::shared_ptr<Triangle>> triangles;
+};
+
+class AreaLight : public Mesh{
+public:
+    AreaLight(){}
+    AreaLight(float size, float height, float intensity);
+
 };
 
 

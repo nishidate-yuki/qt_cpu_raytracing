@@ -41,6 +41,11 @@ void Mesh::createTriangles()
     }
 }
 
+void Mesh::appengTriangle(const std::shared_ptr<Triangle> &triangle)
+{
+    triangles.append(triangle);
+}
+
 bool Mesh::intersect(const Ray &ray, Intersection &intersection)
 {
     bool hit = false;
@@ -147,4 +152,21 @@ Mesh importFbx(const char* filename, const float scale, const QVector3D& offset)
     manager->Destroy();
 
     return mesh;
+}
+
+AreaLight::AreaLight(float size, float height, float intensity)
+{
+    QVector3D v0 = {-size/2, height,  size/2};
+    QVector3D v1 = {-size/2, height, -size/2};
+    QVector3D v2 = { size/2, height, -size/2};
+    QVector3D v3 = { size/2, height, size/2};
+    auto tri1 = std::make_shared<Triangle>(v0, v3, v1);
+    auto tri2 = std::make_shared<Triangle>(v1, v3, v2);
+
+    appengTriangle(tri1);
+    appengTriangle(tri2);
+
+    auto light = std::make_shared<Light>(intensity);
+    setMaterial(light);
+
 }

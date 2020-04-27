@@ -41,6 +41,7 @@ private:
     QGraphicsPixmapItem* pixmapItem;
     QImage* image;
     QVector<QVector<QVector3D>> fImage;
+    AreaLight areaLight;
 };
 
 #endif // RENDERVIEW_H
