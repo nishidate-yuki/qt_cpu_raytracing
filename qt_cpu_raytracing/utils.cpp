@@ -74,3 +74,12 @@ float length(const QVector3D &v)
 {
     return v.length();
 }
+
+QString alignString(QString str)
+{
+    QString space;
+    for (int i=0; i<19 - str.size(); i++) {
+        space += " ";
+    }
+    return str + space + ":";
+}

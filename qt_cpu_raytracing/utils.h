@@ -25,6 +25,8 @@ QColor colorFromVector(QVector3D &);
 
 QVector<QVector<QVector3D>> createImage(const int&, const int&);
 
+QString alignString(QString);
+
 //void sleep(int);
 
 #endif // UTILS_H

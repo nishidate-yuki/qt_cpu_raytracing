@@ -45,11 +45,11 @@ void RenderView::render()
     cornellBox << std::make_shared<Sphere>(QVector3D(-(10000+boxSize/2), 0, 0), 10000, redDiffuse); // left
     cornellBox << std::make_shared<Sphere>(QVector3D(0, 0, -(10000+boxSize/2)), 10000, diffuse); // front
     cornellBox << std::make_shared<Sphere>(QVector3D(0, 0, 10030), 10000, black); // back
-    cornellBox << std::make_shared<Sphere>(QVector3D(5, -(boxSize/2)+sphereRad, 3), sphereRad, mirror);
-    cornellBox << std::make_shared<Sphere>(QVector3D(-5, -(boxSize/2)+sphereRad, 1), sphereRad, glass);
+//    cornellBox << std::make_shared<Sphere>(QVector3D(5, -(boxSize/2)+sphereRad, 3), sphereRad, mirror);
+//    cornellBox << std::make_shared<Sphere>(QVector3D(-5, -(boxSize/2)+sphereRad, 1), sphereRad, glass);
 
-//    Mesh bunnyHigh = importFbx("E:/3D Objects/cornell_box/bunny.fbx");
-//    cornellBox << std::make_shared<BVH>(bunnyHigh);
+    Mesh bunnyHigh = importFbx("E:/3D Objects/cornell_box/bunny.fbx");
+    cornellBox << std::make_shared<BVH>(bunnyHigh);
 
     // area light
     areaLight = AreaLight(4, boxSize/2 - 0.01f, 20);

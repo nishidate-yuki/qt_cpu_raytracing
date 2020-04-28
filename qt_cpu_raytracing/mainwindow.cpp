@@ -24,5 +24,5 @@ void MainWindow::on_pushButton_clicked()
     ui->graphicsView->render();
 
     qint64 elp = timer.elapsed();
-    qDebug().nospace() << elp/1000 << "." << elp%1000 << "s";
+    qDebug().nospace().noquote() << alignString("Total Rendering") << elp/1000 << "." << elp%1000 << "s";
 }

@@ -104,28 +104,36 @@ void constructBVH(QVector<std::shared_ptr<Triangle>> &triangles, std::shared_ptr
         // axisでソート
         sortByAxis(triangles, axis);
 
-        QVector<std::shared_ptr<Triangle>> leftTris;
-        auto rightTris = triangles;
+        // 左側BBsの計算
+        BoundingBox leftBB;
+        QVector<BoundingBox> leftBBs;
+        for (int i=0; i<triangles.size()-1; i++) {
+            leftBB = mergeBB(leftBB, createBB(triangles[i]));
+            // 後ろに追加
+            leftBBs.push_back(leftBB);
+        }
 
-        // triangleを1つずつ左に移しながら評価する
+        // 右側のBBs計算
+        BoundingBox rightBB;
+        QVector<BoundingBox> rightBBs;
+        for (int i=triangles.size()-1; i>=1; i--) {
+            rightBB = mergeBB(rightBB, createBB(triangles[i]));
+            // 前に追加
+            rightBBs.push_front(rightBB);
+        }
+
         for (int i=0; i<triangles.size()-1; i++){
-            BoundingBox leftBB = createBBfromTriangles(leftTris);
-            BoundingBox rightBB = createBBfromTriangles(rightTris);
+            float leftSA = calcSurfaceArea(leftBBs[i]);
+            float rightSA = calcSurfaceArea(rightBBs[i]);
 
-            float leftSA = calcSurfaceArea(leftBB);
-            float rightSA = calcSurfaceArea(rightBB);
-
+            int leftSize = i+1;
+            int rightSize = triangles.size() - (i+1);
             float cost = 2*1
-                         + (leftSA*leftTris.size() + rightSA*rightTris.size())
+                         + (leftSA*leftSize + rightSA*rightSize)
                                * 1 / rootSA;
             if(cost < std::get<2>(bestDivision)){
                 bestDivision = std::make_tuple(axis, i, cost);
             }
-
-            // right->left に tri を移動
-            auto tmp = rightTris.front();
-            leftTris.append(tmp);
-            rightTris.pop_front();
         }
     }
 
@@ -148,15 +156,23 @@ void constructBVH(QVector<std::shared_ptr<Triangle>> &triangles, std::shared_ptr
         right.append(triangles[i]);
     }
 
+//    qDebug() << left.size() << right.size();
+
     constructBVH(left, node->left);
     constructBVH(right, node->right);
 }
 
 BVH::BVH(Mesh &mesh)
 {
+    QElapsedTimer timer;
+    timer.start();
+
     root = std::make_shared<BVHnode>();
     auto triangles = mesh.getTriangles();
     constructBVH(triangles, root);
+
+    qint64 elp = timer.elapsed();
+    qDebug().nospace().noquote() << alignString("BVH Constructing") << elp/1000 << "." << elp%1000 << "s";
 }
 
 
@@ -202,6 +218,7 @@ bool BVHnode::intersect(const Ray &ray, Intersection &intersection)
 
     // 交差して、葉である場合
     if(isLeaf()){
+        // ポリゴンとの交差判定を行う
         Intersection hitpoint;
         if(triangle->intersect(ray, hitpoint)){
             if(hitpoint.distance < intersection.distance){

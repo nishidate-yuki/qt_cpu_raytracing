@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QTimer>
 #include <QElapsedTimer>
+#include "utils.h"
 
 namespace Ui {
 class MainWindow;

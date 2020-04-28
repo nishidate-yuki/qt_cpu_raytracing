@@ -1,12 +1,13 @@
 #ifndef BVH_H
 #define BVH_H
 
+#include <tuple>
 #include <QVector>
 #include <algorithm>
+#include <QElapsedTimer>
 #include "triangle.h"
 #include "mesh.h"
 #include "ray.h"
-#include <tuple>
 
 // BB: BoundingBox
 class BoundingBox
