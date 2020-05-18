@@ -122,6 +122,7 @@ void constructBVH(QVector<std::shared_ptr<Triangle>> &triangles, std::shared_ptr
             rightBBs.push_front(rightBB);
         }
 
+        // best cost を探索
         for (int i=0; i<triangles.size()-1; i++){
             float leftSA = calcSurfaceArea(leftBBs[i]);
             float rightSA = calcSurfaceArea(rightBBs[i]);
@@ -155,8 +156,6 @@ void constructBVH(QVector<std::shared_ptr<Triangle>> &triangles, std::shared_ptr
     for (int i=bestSplitIndex+1; i<triangles.size(); i++) {
         right.append(triangles[i]);
     }
-
-//    qDebug() << left.size() << right.size();
 
     constructBVH(left, node->left);
     constructBVH(right, node->right);

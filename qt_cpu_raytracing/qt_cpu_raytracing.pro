@@ -33,6 +33,7 @@ SOURCES += \
         mesh.cpp \
         object.cpp \
         ray.cpp \
+        renderer.cpp \
         renderview.cpp \
         sky.cpp \
         sphere.cpp \
@@ -47,6 +48,7 @@ HEADERS += \
         mesh.h \
         object.h \
         ray.h \
+        renderer.h \
         renderview.h \
         sky.h \
         sphere.h \

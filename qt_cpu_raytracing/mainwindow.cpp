@@ -20,8 +20,10 @@ void MainWindow::on_pushButton_clicked()
     QElapsedTimer timer;
     timer.start();
 
-    ui->graphicsView->NUM_SAMPLES = ui->sampleBox->value();
-    ui->graphicsView->render();
+    //ui->graphicsView->NUM_SAMPLES = ui->sampleBox->value();
+//    ui->graphicsView->render();
+    ui->graphicsView->renderer->num_samples = ui->sampleBox->value();
+    emit ui->graphicsView->renderRequested();
 
     qint64 elp = timer.elapsed();
     qDebug().nospace().noquote() << alignString("Total Rendering") << elp/1000 << "." << elp%1000 << "s";

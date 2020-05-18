@@ -23,7 +23,6 @@ public:
     }
 
     bool intersect(const Ray &ray);
-
 };
 
 // BVH のノードの構造
